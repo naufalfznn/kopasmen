@@ -1,8 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Anggota
-from admin_koperasi.models import Admin
 from .forms import AdminForm, AnggotaForm
-from django.contrib.auth.models import User
+from django.db import connection
 
 def kelola_akun_view(request):
     anggotas = Anggota.objects.all() 
@@ -22,10 +21,10 @@ def tambah_anggota(request):
     if request.method == 'POST':
         form = AnggotaForm(request.POST)
         if form.is_valid():
-            form.save() 
-            return redirect('kelola_akun') 
-        form = AnggotaForm()
-    
+            form.save()
+            return redirect('kelola_akun')
+    else:
+        form = AnggotaForm() 
     return render(request, 'form_admin.html', {'form': form, 'judul': 'Tambah Anggota'})
 
 def anggota_detail(request, id_anggota):
@@ -47,6 +46,8 @@ def edit_anggota(request, id_anggota):
 def hapus_anggota(request, id_anggota):
     anggota = get_object_or_404(Anggota, id_anggota=id_anggota)
     anggota.delete()
+    with connection.cursor() as cursor:
+        cursor.execute("ALTER TABLE anggota AUTO_INCREMENT = 1;")
     return redirect('kelola_akun')
 
 
