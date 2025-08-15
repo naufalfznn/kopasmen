@@ -12,9 +12,9 @@ class Anggota(models.Model):
         ('nonaktif', 'Nonaktif'),
     ]
 
-    id_anggota = models.BigAutoField(primary_key=True)
-    nip = models.CharField(max_length=30, unique=True)
+    nomor_anggota = models.CharField(max_length=20, unique=True, primary_key=True, default="0")
     nama = models.CharField(max_length=100)
+    nip = models.CharField(max_length=30, unique=True)
     alamat = models.CharField(max_length=255, blank=True, null=True)
     no_telp = models.CharField(max_length=20, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)

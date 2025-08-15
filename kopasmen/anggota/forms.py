@@ -9,15 +9,16 @@ class AdminForm(forms.ModelForm):
 
 class AnggotaForm(forms.ModelForm):
     tanggal_daftar = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date'})  # Tidak perlu menggunakan input_formats
+        widget=forms.DateInput(attrs={'type': 'date'}) 
     )
 
     class Meta:
         model = Anggota
         fields = '__all__'
         labels = {
-            'nip': 'Nomor Induk Pegawai (NIP)',
+            'nomor_anggota': 'No. Anggota',
             'nama': 'Nama',
+            'nip': 'Nomor Induk Pegawai (NIP)',
             'alamat': 'Alamat',
             'no_telp': 'No. Telepon',
             'email': 'Email',

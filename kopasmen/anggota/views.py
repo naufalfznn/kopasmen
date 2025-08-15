@@ -27,15 +27,15 @@ def tambah_anggota(request):
         form = AnggotaForm() 
     return render(request, 'form_admin.html', {'form': form, 'judul': 'Tambah Anggota'})
 
-def anggota_detail(request, id_anggota):
+def anggota_detail(request, nomor_anggota):
     try:
-        anggota = Anggota.objects.get(id_anggota=id_anggota)
+        anggota = Anggota.objects.get(nomor_anggota=nomor_anggota)
         return render(request, 'detail.html', {'anggota': anggota})
     except Anggota.DoesNotExist:
         return render(request, 'detail.html', {'error': 'Anggota not found'})
     
-def edit_anggota(request, id_anggota):
-    anggota = get_object_or_404(Anggota, id_anggota=id_anggota)
+def edit_anggota(request, nomor_anggota):
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
     form = AnggotaForm(request.POST or None, instance=anggota)
     if form.is_valid():
         form.save()
@@ -43,14 +43,11 @@ def edit_anggota(request, id_anggota):
     return render(request, 'form_anggota.html', {'form': form, 'judul': 'Edit Anggota'})
 
 
-def hapus_anggota(request, id_anggota):
-    anggota = get_object_or_404(Anggota, id_anggota=id_anggota)
+def hapus_anggota(request, nomor_anggota):
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
     anggota.delete()
-    with connection.cursor() as cursor:
-        cursor.execute("ALTER TABLE anggota AUTO_INCREMENT = 1;")
     return redirect('kelola_akun')
 
-
-def detail_anggota(request, id_anggota):
-    anggota = get_object_or_404(Anggota, id_anggota=id_anggota)
+def detail_anggota(request, nomor_anggota):
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
     return render(request, 'detail.html', {'anggota': anggota})

@@ -79,9 +79,9 @@
                     <table border="1">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>NIP</th>
+                                <th>No. Anggota</th>
                                 <th>Nama</th>
+                                <th>NIP</th>
                                 <th>Alamat</th>
                                 <th>No. Telepon</th>
                                 <th>Email</th>
@@ -95,9 +95,9 @@
                         <tbody>
                             {% for anggota in anggotas %}
                             <tr>
-                                <td>{{ anggota.id_anggota }}</td>
-                                <td>{{ anggota.nip }}</td>
+                                <td>{{ anggota.nomor_anggota }}</td>
                                 <td>{{ anggota.nama }}</td>
+                                <td>{{ anggota.nip }}</td>
                                 <td>{{ anggota.alamat }}</td>
                                 <td>{{ anggota.no_telp }}</td>
                                 <td>{{ anggota.email }}</td>
@@ -106,9 +106,9 @@
                                 <td>{{ anggota.status }}</td>
                                 <td>{{ anggota.alasan_tidak_aktif }}</td>
                                 <td class="action-links">
-                                    <a href="{% url 'detail_anggota' anggota.id_anggota %}" class="btn btn-view">Lihat</a>
-                                    <a href="{% url 'edit_anggota' anggota.id_anggota %}" class="btn btn-edit">Edit</a>
-                                    <a href="{% url 'hapus_anggota' anggota.id_anggota %}" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus anggota ini?');">Hapus</a>
+                                    <a href="{% url 'detail_anggota' anggota.nomor_anggota %}" class="btn btn-view">Lihat</a>
+                                    <a href="{% url 'edit_anggota' anggota.nomor_anggota %}" class="btn btn-edit">Edit</a>
+                                    <a href="{% url 'hapus_anggota' anggota.nomor_anggota %}" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus anggota ini?');">Hapus</a>
                                 </td>
                             </tr>
                             {% empty %}
