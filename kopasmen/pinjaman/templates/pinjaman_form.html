@@ -6,14 +6,13 @@
     <title>Tambah Pinjaman</title>
 </head>
 <body>
-    <h1>Tambah Pinjaman</h1>
-    
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Simpan Pinjaman</button>
-    </form>
+    <h1>Tambah Simpanan</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Simpan</button>
+</form>
+<a href="{% url 'simpanan_list' %}">Kembali</a>
 
-    <a href="{% url 'pinjaman_list' %}">Kembali ke Daftar Pinjaman</a>
 </body>
 </html>

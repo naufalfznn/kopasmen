@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'admin_koperasi',
     'anggota',
     'pinjaman',
+    'simpanan',
 ]
 
 MIDDLEWARE = [
