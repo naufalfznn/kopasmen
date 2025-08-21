@@ -24,5 +24,6 @@ urlpatterns = [
     path('', include('admin_koperasi.urls')),
     path('anggota/', include('anggota.urls')),
     path('dashboard/', include('admin_koperasi.urls')),
+    path('pinjaman/', include('pinjaman.urls')),
 ]
 
