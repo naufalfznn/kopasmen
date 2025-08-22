@@ -27,7 +27,7 @@ class Anggota(models.Model):
         db_table = 'Anggota'
 
     def __str__(self):
-        return f"{self.nip} - {self.nama}"
+        return f"{self.nomor_anggota} - {self.nama}"
 
     def set_password(self, raw_password: str):
         

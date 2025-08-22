@@ -7,13 +7,77 @@
 </head>
 <body>
     <h1>Tambah Pinjaman</h1>
-    
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        <p>
+            {{ form.nomor_anggota.label_tag }} {{ form.nomor_anggota }}
+        </p>
+        <p>
+            {{ form.id_jenis_pinjaman.label_tag }} {{ form.id_jenis_pinjaman }}
+        </p>
+        <p>
+            {{ form.jumlah_pinjaman.label_tag }} {{ form.jumlah_pinjaman }}
+        </p>
+        <p>
+            {{ form.lama_peminjaman.label_tag }} {{ form.lama_peminjaman }}
+        </p>
+        <p>
+            {{ form.angsuran_per_bulan.label_tag }} {{ form.angsuran_per_bulan }}
+        </p>
+        <p>
+            {{ form.kategori_jasa.label_tag }} {{ form.kategori_jasa }}
+        </p>
+        <p>
+            <label for="id_jasa_persen">Persentase Jasa (%)</label><br>
+            {{ form.jasa_persen }} 
+        </p>
+        <p>
+            <label for="id_jasa_pinjam">Jasa Pinjaman</label><br>
+            {{ form.jasa_pinjam }} 
+        </p>
+        <p>
+            {{ form.tanggal_meminjam.label_tag }} {{ form.tanggal_meminjam }}
+        </p>
+        <p>
+            {{ form.jatuh_tempo.label_tag }} {{ form.jatuh_tempo }}
+        </p>
+        <p>
+            {{ form.status.label_tag }} {{ form.status }}
+        </p>
+        <p>
+            {{ form.id_admin.label_tag }} {{ form.id_admin }}
+        </p>
+
         <button type="submit">Simpan Pinjaman</button>
     </form>
-
     <a href="{% url 'pinjaman_list' %}">Kembali ke Daftar Pinjaman</a>
+
+    <script>
+        const jumlahField = document.getElementById("id_jumlah_pinjaman");
+        const lamaField = document.getElementById("id_lama_peminjaman");
+        const jasaPersenField = document.getElementById("id_jasa_persen");
+        const jasaPinjamField = document.getElementById("id_jasa_pinjam");
+        const angsuranField = document.getElementById("id_angsuran_per_bulan");
+
+        function hitungJasa() {
+            const jumlah = parseFloat(jumlahField.value) || 0;
+            const lama = parseInt(lamaField.value) || 0;
+            const jasaPersen = parseFloat(jasaPersenField.value) || 0;
+
+            const jasaPinjam = (jumlah * jasaPersen) / 100;
+            jasaPinjamField.value = jasaPinjam.toFixed(2);
+
+            if (lama > 0) {
+                const angsuran = jumlah / lama;
+                angsuranField.value = angsuran.toFixed(2); 
+            } else {
+                angsuranField.value = 0;
+            }
+        }
+
+        jumlahField.addEventListener("input", hitungJasa);
+        lamaField.addEventListener("input", hitungJasa);
+        jasaPersenField.addEventListener("input", hitungJasa);
+    </script>
 </body>
 </html>
