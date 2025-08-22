@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Admin</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Detail Admin</h1>
+
+        {% if admin %}
+        <table>
+            <tr>
+                <th>No</th>
+                <td>{{ nomor_urut }}</td> 
+            </tr>
+            <tr>
+                <th>Username</th>
+                <td>{{ admin.username }}</td>
+            </tr>
+            <tr>
+                <th>Role</th>
+                <td>{{ admin.role }}</td>
+            </tr>
+        </table>
+        {% else %}
+        <p>{{ error }}</p>
+        {% endif %}
+
+        <a href="{% url 'kelola_akun' %}">Kembali</a>
+    </div>
+</body>
+</html>

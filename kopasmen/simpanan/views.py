@@ -17,7 +17,7 @@ def tambah_simpanan(request):
 def daftar_simpanan(request):
     data = (
         Simpanan.objects.values(
-            kode_anggota=F('anggota__nomor_anggota'),   # ganti dari anggota_id
+            kode_anggota=F('anggota__nomor_anggota'),
             no_anggota=F('anggota__nomor_anggota'),
             nama_anggota=F('anggota__nama')
         )
@@ -35,7 +35,6 @@ def detail_simpanan(request, nomor_anggota):
     simpanan = Simpanan.objects.filter(anggota=anggota)
 
 
-    # Hitung total berdasarkan jenis simpanan (sesuaikan dengan isi tabel jenis_simpanan)
     total_pokok = simpanan.filter(jenis_simpanan__nama_jenis="Simpanan Pokok").aggregate(
         total=Sum('jumlah_menyimpan')
     )['total'] or 0

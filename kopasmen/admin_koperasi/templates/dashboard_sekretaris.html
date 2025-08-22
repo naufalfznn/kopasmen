@@ -5,6 +5,14 @@
   <title>Dashboard Sekretaris</title>
 </head>
 <body>
+
+  <table border="1" width="100%" cellpadding="5">
+    <tr>
+      <td><a href="{% url 'dashboard' %}">Dashboard</a></td>
+      <td><a href="{% url 'kelola_akun' %}">Manajemen Anggota</a></td>
+      <td><a href="{% url 'logout' %}">Logout</a></td>
+    </tr>
+  </table>
   <h1>Dashboard Sekretaris</h1>
   <p>Halo {{ username }} ({{ role }})</p>
   <p><a href="{% url 'logout' %}">Logout</a></p>

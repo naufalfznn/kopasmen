@@ -45,12 +45,13 @@
                         </thead>
                         <tbody>
                             {% for admin in admins %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
+                           <tr>
+                                <td>{{ forloop.counter }}</td> 
                                 <td>{{ admin.username }}</td>
                                 <td>{{ admin.role }}</td>
                                 <td class="action-links">
                                     <a href="{% url 'edit_admin' admin.id_admin %}" class="btn btn-edit">Edit</a>
+                                    <a href="{% url 'detail_admin' admin.id_admin %}" class="btn btn-view">Lihat</a>
                                     <a href="{% url 'hapus_admin' admin.id_admin %}" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus admin ini?');">Hapus</a>
                                 </td>
                             </tr>

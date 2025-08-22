@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.hashers import make_password
 from admin_koperasi.models import Admin 
 from .models import Anggota
 
@@ -6,6 +7,21 @@ class AdminForm(forms.ModelForm):
     class Meta:
         model = Admin
         fields = ['username', 'password_hash', 'role']
+        labels = {
+            'password_hash': 'Password',
+        }
+        widgets = {
+            'password_hash': forms.PasswordInput(),  # biar input tersembunyi
+        }
+
+    def save(self, commit=True):
+        admin = super().save(commit=False)
+        # cek kalau password belum ter-hash
+        if not admin.password_hash.startswith('pbkdf2_sha256$'):
+            admin.password_hash = make_password(self.cleaned_data['password_hash'])
+        if commit:
+            admin.save()
+        return admin
 
 class AnggotaForm(forms.ModelForm):
     tanggal_daftar = forms.DateField(

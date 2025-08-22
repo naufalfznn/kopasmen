@@ -2,10 +2,6 @@ from django.db import models
 from anggota.models import Anggota
 from admin_koperasi.models import Admin
 
-
-# ============================
-# JENIS SIMPANAN
-# ============================
 class JenisSimpanan(models.Model):
     POKOK = "POKOK"
     WAJIB = "WAJIB"
@@ -30,10 +26,6 @@ class JenisSimpanan(models.Model):
     def __str__(self):
         return self.get_nama_jenis_display()
 
-
-# ============================
-# SIMPANAN
-# ============================
 class Simpanan(models.Model):
     id_simpanan = models.BigAutoField(primary_key=True)
     anggota = models.ForeignKey(Anggota, on_delete=models.CASCADE)
@@ -50,10 +42,6 @@ class Simpanan(models.Model):
     def __str__(self):
         return f"{self.jenis_simpanan} - {self.anggota.nama}"
 
-
-# ============================
-# PENARIKAN
-# ============================
 class Penarikan(models.Model):
     id_penarikan = models.BigAutoField(primary_key=True)
     anggota = models.ForeignKey(Anggota, on_delete=models.CASCADE)
