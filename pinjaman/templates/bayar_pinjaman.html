@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayar Pinjaman</title>
+</head>
+<body>
+
+    <h1>Bayar Pinjaman</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            <label for="nama_anggota">Nama Anggota:</label>
+            <input type="text" value="{{ pinjaman.nomor_anggota }}" disabled>
+        </div>
+
+        <div>
+            <label for="pinjaman">Pinjaman:</label>
+            <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman }}" disabled>
+        </div>
+
+        <div>
+            <label for="sisa_pinjaman">Sisa Pinjaman:</label>
+            <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman - pinjaman.total_bayar }}" disabled>
+        </div>
+
+        <div>
+            <label for="tanggal">Tanggal:</label>
+            <input type="date" name="tanggal_bayar" required>
+        </div>
+
+        <div>
+            <label for="jumlah_cicilan">Jumlah Cicilan:</label>
+            <input type="number" name="jumlah_cicilan" value="{{ pinjaman.angsuran_per_bulan }}" step="0.01" disabled>
+        </div>
+
+        <div>
+            <label for="jasa_persen">Persentase Jasa:</label>
+            <input type="number" name="jasa_persen" value="{{ pinjaman.hitung_jasa }}" step="0.01" disabled>
+        </div>
+            <label for="jasa_rupiah">Jumlah Jasa:</label>
+            <input type="number" name="jasa_rupiah" value="{{ pinjaman.hitung_jasa }}" step="0.01" disabled>
+        <div>
+
+        </div>
+        <div>
+            <label for="jumlah_dibayar">Jumlah Dibayar:</label>
+            <input type="number" name="jumlah_dibayar" required>
+        </div>
+
+        <button type="submit">Bayar</button>
+        <a href="{% url 'pinjaman:pinjaman_list' %}">Batal</a>
+    </form>
+
+</body>
+</html>

@@ -44,7 +44,8 @@ class Pinjaman(models.Model):
     id_admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
     jumlah_pinjaman = models.DecimalField(max_digits=18, decimal_places=2)
     angsuran_per_bulan = models.DecimalField(max_digits=18, decimal_places=2)
-    jasa = models.DecimalField(max_digits=5, decimal_places=2)
+    jasa_persen = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    jasa_rupiah = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     tanggal_meminjam = models.DateField()
     jatuh_tempo = models.PositiveIntegerField(help_text="Lama pinjaman dalam bulan")
     status = models.CharField(max_length=20)
@@ -57,23 +58,11 @@ class Pinjaman(models.Model):
 
     def hitung_jasa(self):
         """
-        Hitung jasa berdasarkan kategori pinjaman.
-        NOTE: Sementara persentase masih hardcode,
-        bisa dipindahkan ke model KategoriJasa biar lebih fleksibel.
+        Calculate the jasa (fee) based on the loan amount and the percentage.
         """
-        if self.id_jenis_pinjaman.nama_jenis == "Reguler":
-            return self.jumlah_pinjaman * 0.02 
-        elif self.id_jenis_pinjaman.nama_jenis == "Khusus":
-            return self.jumlah_pinjaman * 0.015 
-        elif self.id_jenis_pinjaman.nama_jenis == "Barang":
-            return self.jumlah_pinjaman * 0.02 
+        if self.jasa_persen and self.jumlah_pinjaman:
+            return self.jumlah_pinjaman * (self.jasa_persen / 100)
         return 0
-    
-    def total_bayar(self):
-        total_angsur = Angsuran.objects.filter(
-            id_pinjaman=self
-        ).aggregate(total=models.Sum('jumlah_bayar'))['total'] or 0
-        return total_angsur
 
 
 class Angsuran(models.Model):

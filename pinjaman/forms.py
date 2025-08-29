@@ -14,10 +14,11 @@ class PinjamanForm(forms.ModelForm):
             'jatuh_tempo',
             'jumlah_pinjaman',
             'angsuran_per_bulan',
-            'jasa',
+            'jasa_persen',
+            'jasa_rupiah',  # Akan dihitung otomatis
             'status',
-
         ]
+        
         widgets = {
             'nomor_anggota': forms.Select(attrs={'class': 'form-control'}),
             'id_jenis_pinjaman': forms.Select(attrs={'class': 'form-control'}),
@@ -25,9 +26,20 @@ class PinjamanForm(forms.ModelForm):
             'id_admin': forms.Select(attrs={'class': 'form-control'}),
             'tanggal_meminjam': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'jatuh_tempo': forms.NumberInput(attrs={'class': 'form-control','min': 1,'max': 36,'placeholder': 'Masukkan jumlah bulan (1-36)'}),
-            'jumlah_pinjaman': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Jumlah Pinjaman'}),
-            'angsuran_per_bulan': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Jumlah Cicilan'}),
-            'jasa': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Jumlah Jasa'}),
+            'jumlah_pinjaman': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan jumlah pinjaman'}),
+            'angsuran_per_bulan': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan jumlah angsuran per bulan'}),
+            'jasa_persen': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan persentase jasa'}),
+            'jasa_rupiah': forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),  # Jangan bisa diedit
             'status': forms.Select(choices=[('Lunas', 'Lunas'), ('Belum Lunas', 'Belum Lunas')],
                                    attrs={'class': 'form-control'}),
         }
+
+    def clean_jasa_rupiah(self):
+        cleaned_data = super().clean()
+        jasa_persen = cleaned_data.get('jasa_persen')
+        jumlah_pinjaman = cleaned_data.get('jumlah_pinjaman')
+
+        if jasa_persen is not None and jumlah_pinjaman is not None:
+            jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100)
+            return jasa_rupiah
+        return 0  # Default if not present

@@ -43,38 +43,31 @@
     <table>
         <thead>
             <tr>
+                <th>Nomor Anggota</th>
                 <th>Nama Anggota</th>
-                <th>Tanggal</th>
-                <th>Jenis</th>
-                <th>Jumlah Pinjaman</th>
-                <th>Jumlah Cicilan</th>
-                <th>Jasa</th>
-                <th>Total (Cicilan + Jasa)</th>
-                <th>Status</th>
+                <th>Pinjaman Reguler</th>
+                <th>Pinjaman Khusus</th>
+                <th>Pinjaman Barang</th>
                 <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
-            {% for pinjaman in pinjaman_list %}
+            {% for anggota, jenis_pinjaman_dict in pinjaman_dict.items %}
                 <tr>
-                    <td>{{ pinjaman.nomor_anggota.nama }}</td>
-                    <td>{{ pinjaman.tanggal_meminjam|date:"d M Y" }}</td>
-                    <td>{{ pinjaman.id_jenis_pinjaman.nama_jenis }}</td>
-                    <td>{{ pinjaman.jumlah_pinjaman }}</td>
-                    <td>{{ pinjaman.angsuran_per_bulan }}</td>
-                    <td>{{ pinjaman.jasa }}</td>
-                    <td>{{ pinjaman.total_bayar }}</td>
-                    <td>{{ pinjaman.status }}</td>
+                    <td>{{ jenis_pinjaman_dict.nomor_anggota }}</td>
+                    <td>{{ anggota }}</td>
+                    <td>{{ jenis_pinjaman_dict.Reguler }}</td>
+                    <td>{{ jenis_pinjaman_dict.Khusus }}</td>
+                    <td>{{ jenis_pinjaman_dict.Barang }}</td>
                     <td class="aksi">
-                        {% comment %} <a href="{% url 'detail_pinjaman' pinjaman.id_pinjaman %}">Detail</a>
-                        {% if pinjaman.status != 'Lunas' %}
-                            | <a href="{% url 'bayar_pinjaman' pinjaman.id_pinjaman %}">Bayar</a>
-                        {% endif %} {% endcomment %}
+                        {% for pinjaman_id in jenis_pinjaman_dict.pinjaman_ids %}
+                            <a href="{% url 'pinjaman_anggota' %}">Detail</a>
+                        {% endfor %}
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="9" style="text-align:center;">Belum ada data pinjaman</td>
+                    <td colspan="6" style="text-align:center;">Belum ada data pinjaman</td>
                 </tr>
             {% endfor %}
         </tbody>
