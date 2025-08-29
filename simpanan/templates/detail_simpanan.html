@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Detail Simpanan</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #fff;
+    }
+    .card {
+      border: 1px solid #aaa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h3 {
+      margin-bottom: 15px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .field {
+      flex: 1;
+      margin-right: 20px;
+    }
+    .field label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .field div {
+      padding: 8px 12px;
+      border: 1px solid #aaa;
+      border-radius: 20px;
+      background: #fff;
+    }
+    .transaksi {
+      border: 1px solid #aaa;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #f3f3f3;
+    }
+    .transaksi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .jenis {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .desc {
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .meta {
+      font-size: 13px;
+      color: #777;
+      display: flex;
+      gap: 15px;
+    }
+    .meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label>Nomor Anggota :</label>
+        <div>{{ anggota.nomor_anggota }}</div>
+      </div>
+      <div class="field">
+        <label>Nama Anggota :</label>
+        <div>{{ anggota.nama }}</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Jumlah Pokok :</label>
+        <div>Rp. {{ total_pokok|default:"0" }}</div>
+      </div>
+      <div class="field">
+        <label>Jumlah Wajib :</label>
+        <div>Rp. {{ total_wajib|default:"0" }}</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Jumlah Sukarela :</label>
+        <div>Rp. {{ total_sukarela|default:"0" }}</div>
+      </div>
+      <div class="field">
+        <label>Tanggal Input :</label>
+        <div>{{ tanggal_input|date:"d F Y" }}</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Petugas Input :</label>
+        <div>{{ petugas_input }}</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Riwayat Transaksi</h3>
+
+  {% for s in simpanan %}
+  <div class="transaksi">
+    <div class="transaksi-header">
+      <div class="jenis">{{ s.jenis_simpanan.nama_jenis }}</div>
+      <div><strong>Rp. {{ s.jumlah_menyimpan }}</strong></div>
+    </div>
+    <div class="desc">Setoran rutin bulanan</div>
+    <div class="meta">
+      <span>📅 {{ s.tanggal_menyimpan|date:"d F Y" }}</span>
+      {% if s.tanggal_menyimpan.hour %}
+      <span>⏰ {{ s.tanggal_menyimpan|time:"H:i" }}</span>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <p>Belum ada data transaksi.</p>
+  {% endfor %}
+
+</body>
+</html>
