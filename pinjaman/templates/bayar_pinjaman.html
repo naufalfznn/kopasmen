@@ -12,46 +12,52 @@
     <form method="POST">
         {% csrf_token %}
         <div>
-            <label for="nama_anggota">Nama Anggota:</label>
+            <label>Nama Anggota:</label>
             <input type="text" value="{{ pinjaman.nomor_anggota }}" disabled>
         </div>
 
         <div>
-            <label for="pinjaman">Pinjaman:</label>
+            <label>Pinjaman:</label>
             <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman }}" disabled>
         </div>
 
         <div>
-            <label for="sisa_pinjaman">Sisa Pinjaman:</label>
-            <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman - pinjaman.total_bayar }}" disabled>
+            <label>Sisa Pinjaman:</label>
+            <input type="text" value="Rp. {{ sisa_pinjaman }}" disabled>
         </div>
 
         <div>
-            <label for="tanggal">Tanggal:</label>
+            <label>Tanggal:</label>
             <input type="date" name="tanggal_bayar" required>
         </div>
 
         <div>
-            <label for="jumlah_cicilan">Jumlah Cicilan:</label>
-            <input type="number" name="jumlah_cicilan" value="{{ pinjaman.angsuran_per_bulan }}" step="0.01" disabled>
+            <label>Jumlah Cicilan Pokok:</label>
+            <input type="number" value="{{ angsuran_pokok }}" step="0.01" disabled>
         </div>
 
         <div>
-            <label for="jasa_persen">Persentase Jasa:</label>
-            <input type="number" name="jasa_persen" value="{{ pinjaman.hitung_jasa }}" step="0.01" disabled>
+            <label>Persentase Jasa:</label>
+            <input type="number" value="{{ pinjaman.jasa_persen }}" step="0.01" disabled>
         </div>
-            <label for="jasa_rupiah">Jumlah Jasa:</label>
-            <input type="number" name="jasa_rupiah" value="{{ pinjaman.hitung_jasa }}" step="0.01" disabled>
-        <div>
 
+        <div>
+            <label>Jumlah Jasa (Rp):</label>
+            <input type="number" value="{{ jasa_rupiah }}" step="0.01" disabled>
+        </div>
+
+        <div>
+            <label>Jumlah Dibayar (Cicilan + Jasa):</label>
+            <input type="number" name="jumlah_dibayar" value="{{ jumlah_cicilan_total }}" step="0.01">
         </div>
         <div>
-            <label for="jumlah_dibayar">Jumlah Dibayar:</label>
-            <input type="number" name="jumlah_dibayar" required>
+            <label>Admin Bertugas:</label>
+            <input type="text" value="{{ admin_login.username }} ({{ admin_login.role }})" disabled>
         </div>
+
 
         <button type="submit">Bayar</button>
-        <a href="{% url 'pinjaman:pinjaman_list' %}">Batal</a>
+        <a href="{% url 'pinjaman_list' %}">Batal</a>
     </form>
 
 </body>

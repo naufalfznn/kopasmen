@@ -60,9 +60,7 @@
                     <td>{{ jenis_pinjaman_dict.Khusus }}</td>
                     <td>{{ jenis_pinjaman_dict.Barang }}</td>
                     <td class="aksi">
-                        {% for pinjaman_id in jenis_pinjaman_dict.pinjaman_ids %}
-                            <a href="{% url 'pinjaman_anggota' %}">Detail</a>
-                        {% endfor %}
+                        <a href="{% url 'pinjaman_anggota_detail' jenis_pinjaman_dict.nomor_anggota %}">Detail</a>
                     </td>
                 </tr>
             {% empty %}

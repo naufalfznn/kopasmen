@@ -48,6 +48,7 @@ class Pinjaman(models.Model):
     jasa_rupiah = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     tanggal_meminjam = models.DateField()
     jatuh_tempo = models.PositiveIntegerField(help_text="Lama pinjaman dalam bulan")
+    sisa_pinjaman = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     status = models.CharField(max_length=20)
 
     class Meta:
@@ -64,9 +65,11 @@ class Pinjaman(models.Model):
             return self.jumlah_pinjaman * (self.jasa_persen / 100)
         return 0
 
-
+    def sisa(self):
+        return self.jumlah_pinjaman - self.total_bayar()
+    
 class Angsuran(models.Model):
-    id_angsur = models.BigAutoField(primary_key=True)
+    id_pembayaran = models.BigAutoField(primary_key=True)
     id_pinjaman = models.ForeignKey(Pinjaman, on_delete=models.CASCADE)
     id_admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
     jumlah_bayar = models.DecimalField(max_digits=18, decimal_places=2)
@@ -76,4 +79,4 @@ class Angsuran(models.Model):
         db_table = 'Angsuran'
 
     def __str__(self):
-        return f"Angsuran {self.id_angsur} - Pinjaman {self.id_pinjaman.id_pinjaman}"
+        return f"Angsuran {self.id_pembayaran} - Pinjaman {self.id_pinjaman.id_pinjaman}"

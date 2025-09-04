@@ -59,14 +59,13 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label">Persentase Jasa</label>
-                            <input type="number" id="id_jasa_persen" name="jasa_persen" class="form-control" step="0.01" min="0" required>
+                            <input type="text" id="id_jasa_persen" name="jasa_persen" class="form-control" step="0.01" min="0" required inputmode="decimal">
                         </div>
                         <div class="col">
                             <label class="form-label">Jumlah Jasa</label>
                             <input type="text" id="id_jasa_rupiah" name="jasa_rupiah" class="form-control" readonly>
                         </div>
                     </div>
-
 
                     <div class="mb-3">
                         <label class="form-label">Status Pembayaran</label>
@@ -78,7 +77,6 @@
                         <a href="{% url 'pinjaman_list' %}" class="btn btn-batal px-4">Batal</a>
                     </div>
 
-                    <!-- Show form errors -->
                     {% if form.errors %}
                         <div class="alert alert-danger mt-4">
                             <ul>
@@ -98,26 +96,25 @@
 
 <script>
     function hitungJasa() {
-        // Convert both comma (,) and period (.) into a dot for decimal representation
-        var jumlahPinjaman = parseFloat(document.getElementById('id_jumlah_pinjaman').value.replace(',', '.'));
-        var jasaPersen = parseFloat(document.getElementById('id_jasa_persen').value.replace(',', '.'));
+        var jumlahPinjaman = parseFloat(
+            document.getElementById('id_jumlah_pinjaman').value.replace(',', '.')
+        );
+        var jasaPersen = parseFloat(
+            document.getElementById('id_jasa_persen').value.replace(',', '.')
+        );
 
-        // If the values are valid, perform the calculation
         if (!isNaN(jumlahPinjaman) && !isNaN(jasaPersen)) {
             var jasaRupiah = (jumlahPinjaman * (jasaPersen / 100)).toFixed(2);
             document.getElementById('id_jasa_rupiah').value = jasaRupiah;
-            document.getElementById('jasa_rupiah_hidden').value = jasaRupiah;  // Set the hidden input value
         } else {
             document.getElementById('id_jasa_rupiah').value = '';
-            document.getElementById('jasa_rupiah_hidden').value = '';  // Clear the hidden input if invalid
         }
     }
 
-    // Add event listeners for input changes
+
     document.getElementById('id_jumlah_pinjaman').addEventListener('input', hitungJasa);
     document.getElementById('id_jasa_persen').addEventListener('input', hitungJasa);
 </script>
-
 
 </body>
 </html>

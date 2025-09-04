@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Pinjaman, Angsuran, Anggota
+from .models import Pinjaman, Angsuran, Anggota, Admin
 from .forms import PinjamanForm
+from django.db.models import Sum
 
+# Daftar semua pinjaman
 def pinjaman_list(request):
     pinjaman_list = Pinjaman.objects.all()
 
@@ -12,132 +14,277 @@ def pinjaman_list(request):
         nomor_anggota = pinjaman.nomor_anggota.nomor_anggota
         jenis_pinjaman = pinjaman.id_jenis_pinjaman.nama_jenis
         if anggota not in pinjaman_dict:
-            pinjaman_dict[anggota] = {'nomor_anggota': nomor_anggota, 'Reguler': 0, 'Khusus': 0, 'Barang': 0, 'pinjaman_ids': []}
+            pinjaman_dict[anggota] = {
+                'nomor_anggota': nomor_anggota,
+                'Reguler': 0,
+                'Khusus': 0,
+                'Barang': 0,
+                'pinjaman_ids': []
+            }
         
-        if jenis_pinjaman == 'Reguler':
-            pinjaman_dict[anggota]['Reguler'] += pinjaman.jumlah_pinjaman
-        elif jenis_pinjaman == 'Khusus':
-            pinjaman_dict[anggota]['Khusus'] += pinjaman.jumlah_pinjaman
-        elif jenis_pinjaman == 'Barang':
-            pinjaman_dict[anggota]['Barang'] += pinjaman.jumlah_pinjaman
+        # hitung sisa pinjaman
+        jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
+        angsuran_pokok = pinjaman.angsuran_per_bulan or 0
+        sisa_pinjaman = pinjaman.jumlah_pinjaman - (jumlah_cicilan_terbayar * angsuran_pokok)
 
-        pinjaman_dict[anggota]['pinjaman_ids'].append(pinjaman.id_pinjaman)
+        if jenis_pinjaman == 'Reguler':
+            pinjaman_dict[anggota]['Reguler'] += sisa_pinjaman
+        elif jenis_pinjaman == 'Khusus':
+            pinjaman_dict[anggota]['Khusus'] += sisa_pinjaman
+        elif jenis_pinjaman == 'Barang':
+            pinjaman_dict[anggota]['Barang'] += sisa_pinjaman
 
     return render(request, 'pinjaman_list.html', {'pinjaman_dict': pinjaman_dict})
 
-def pinjaman_anggota(request):
+# Pinjaman per anggota
+def pinjaman_anggota(request, nomor_anggota=None):
     anggota_data = {}
+    all_pinjaman_list = []
 
-    for anggota in Anggota.objects.all():
+    if nomor_anggota:
+        anggota_list = Anggota.objects.filter(nomor_anggota=nomor_anggota)
+    else:
+        anggota_list = Anggota.objects.all()
+
+    for anggota in anggota_list:
         pinjaman_data = {
             'nomor_anggota': anggota.nomor_anggota,
             'nama': anggota.nama,
-            'pinjaman_reguler': 0,
-            'pinjaman_khusus': 0,
-            'pinjaman_barang': 0,
-            'angsuran_reguler': 0,
-            'angsuran_khusus': 0,
-            'angsuran_barang': 0,
-            'jasa_reguler': 0,
-            'jasa_khusus': 0,
-            'jasa_barang': 0,
-            'total_cicilan_jasa': 0,
-            'status': 'Belum Lunas',
-            'pinjaman_ids': [],
             'tanggal_meminjam': None,
-            'jasa_persen': 0,  # Ensure jasa_persen is initialized
+            # Reguler
+            'pinjaman_reguler_awal': 0,
+            'angsuran_reguler': 0,
+            'jasa_persen_reguler': 0,
+            'jasa_reguler': 0,
+            'total_reguler': 0,
+            'sisa_reguler': 0,
+            'status_reguler': '-',
+            'pinjaman_reguler_id': None,
+            # Khusus
+            'pinjaman_khusus_awal': 0,
+            'angsuran_khusus': 0,
+            'jasa_persen_khusus': 0,
+            'jasa_khusus': 0,
+            'total_khusus': 0,
+            'sisa_khusus': 0,
+            'status_khusus': '-',
+            'pinjaman_khusus_id': None,
+            # Barang
+            'pinjaman_barang_awal': 0,
+            'angsuran_barang': 0,
+            'jasa_persen_barang': 0,
+            'jasa_barang': 0,
+            'total_barang': 0,
+            'sisa_barang': 0,
+            'status_barang': '-',
+            'pinjaman_barang_id': None,
         }
 
-        for pinjaman in Pinjaman.objects.filter(nomor_anggota=anggota):
-            if pinjaman.status == 'Lunas':
-                pinjaman_data['status'] = 'Lunas'
+        for pinjaman in Pinjaman.objects.filter(nomor_anggota=anggota).order_by('tanggal_meminjam'):
             if pinjaman_data['tanggal_meminjam'] is None:
                 pinjaman_data['tanggal_meminjam'] = pinjaman.tanggal_meminjam
 
-            if pinjaman.id_jenis_pinjaman.nama_jenis == 'Reguler':
-                pinjaman_data['pinjaman_reguler'] += pinjaman.jumlah_pinjaman
-                pinjaman_data['angsuran_reguler'] = pinjaman.angsuran_per_bulan or 0
-                pinjaman_data['jasa_reguler'] = pinjaman.jasa_rupiah or 0
-                pinjaman_data['jasa_persen'] = pinjaman.jasa_persen or 0  # Capture jasa persen if available
-            elif pinjaman.id_jenis_pinjaman.nama_jenis == 'Khusus':
-                pinjaman_data['pinjaman_khusus'] += pinjaman.jumlah_pinjaman
-                pinjaman_data['angsuran_khusus'] = pinjaman.angsuran_per_bulan or 0
-                pinjaman_data['jasa_khusus'] = pinjaman.jasa_rupiah or 0
-                pinjaman_data['jasa_persen'] = pinjaman.jasa_persen or 0
-            elif pinjaman.id_jenis_pinjaman.nama_jenis == 'Barang':
-                pinjaman_data['pinjaman_barang'] += pinjaman.jumlah_pinjaman
-                pinjaman_data['angsuran_barang'] = pinjaman.angsuran_per_bulan or 0
-                pinjaman_data['jasa_barang'] = pinjaman.jasa_rupiah or 0
-                pinjaman_data['jasa_persen'] = pinjaman.jasa_persen or 0
+            angsuran_pokok = pinjaman.angsuran_per_bulan or 0
+            jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
+            total_pokok_bayar = jumlah_cicilan_terbayar * angsuran_pokok
+            sisa_pinjaman = pinjaman.jumlah_pinjaman - total_pokok_bayar
 
-            pinjaman_data['pinjaman_ids'].append(pinjaman.id_pinjaman)
+            # update status otomatis jika lunas
+            if sisa_pinjaman <= 0 and pinjaman.status != "Lunas":
+                pinjaman.status = "Lunas"
+                pinjaman.save()
 
-        pinjaman_data['total_cicilan_jasa'] = (
-            (pinjaman_data['angsuran_reguler'] or 0) + (pinjaman_data['jasa_reguler'] or 0) +
-            (pinjaman_data['angsuran_khusus'] or 0) + (pinjaman_data['jasa_khusus'] or 0) +
-            (pinjaman_data['angsuran_barang'] or 0) + (pinjaman_data['jasa_barang'] or 0)
-        )
+            # hitung jasa sesuai kategori
+            if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+                jasa_rupiah = sisa_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+            else:
+                jasa_rupiah = pinjaman.jumlah_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+
+            jenis = pinjaman.id_jenis_pinjaman.nama_jenis
+            all_pinjaman_list.append({'id': pinjaman.id_pinjaman, 'jenis': jenis})
+
+            if jenis == 'Reguler':
+                pinjaman_data.update({
+                    'pinjaman_reguler_awal': pinjaman.jumlah_pinjaman,
+                    'angsuran_reguler': angsuran_pokok,
+                    'jasa_persen_reguler': pinjaman.jasa_persen,
+                    'jasa_reguler': round(jasa_rupiah, 2),
+                    'total_reguler': round(angsuran_pokok + jasa_rupiah, 2),
+                    'sisa_reguler': sisa_pinjaman,
+                    'status_reguler': pinjaman.status,
+                    'pinjaman_reguler_id': pinjaman.id_pinjaman
+                })
+            elif jenis == 'Khusus':
+                pinjaman_data.update({
+                    'pinjaman_khusus_awal': pinjaman.jumlah_pinjaman,
+                    'angsuran_khusus': angsuran_pokok,
+                    'jasa_persen_khusus': pinjaman.jasa_persen,
+                    'jasa_khusus': round(jasa_rupiah, 2),
+                    'total_khusus': round(angsuran_pokok + jasa_rupiah, 2),
+                    'sisa_khusus': sisa_pinjaman,
+                    'status_khusus': pinjaman.status,
+                    'pinjaman_khusus_id': pinjaman.id_pinjaman
+                })
+            elif jenis == 'Barang':
+                pinjaman_data.update({
+                    'pinjaman_barang_awal': pinjaman.jumlah_pinjaman,
+                    'angsuran_barang': angsuran_pokok,
+                    'jasa_persen_barang': pinjaman.jasa_persen,
+                    'jasa_barang': round(jasa_rupiah, 2),
+                    'total_barang': round(angsuran_pokok + jasa_rupiah, 2),
+                    'sisa_barang': sisa_pinjaman,
+                    'status_barang': pinjaman.status,
+                    'pinjaman_barang_id': pinjaman.id_pinjaman
+                })
 
         anggota_data[anggota.nomor_anggota] = pinjaman_data
 
-    return render(request, 'pinjaman_anggota.html', {'anggota_data': anggota_data})
+    context = {
+        'anggota_data': anggota_data,
+        'all_pinjaman_list': all_pinjaman_list,
+    }
+    return render(request, 'pinjaman_anggota.html', context)
 
 
+# Detail pinjaman
+def detail_pinjaman(request, id_pinjaman):
+    pinjaman = get_object_or_404(Pinjaman, id_pinjaman=id_pinjaman)
+    angsuran_pokok = pinjaman.angsuran_per_bulan or 0
+
+    jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
+    total_pokok_bayar = jumlah_cicilan_terbayar * angsuran_pokok
+    sisa_pinjaman = pinjaman.jumlah_pinjaman - total_pokok_bayar
+
+    # hitung jasa sesuai kategori
+    if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+        jasa_rupiah = sisa_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+    else:
+        jasa_rupiah = pinjaman.jumlah_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+
+    cicilan_total = angsuran_pokok + jasa_rupiah
+
+    total_bayar = Angsuran.objects.filter(id_pinjaman=pinjaman).aggregate(
+        total=Sum('jumlah_bayar')
+    )['total'] or 0
+
+    return render(request, 'detail_pinjaman.html', {
+        'pinjaman': pinjaman,
+        'nama_anggota': pinjaman.nomor_anggota.nama,
+        'jenis_pinjaman': pinjaman.id_jenis_pinjaman.nama_jenis,
+        'jasa': round(jasa_rupiah, 2),
+        'cicilan_total': round(cicilan_total, 2),
+        'total_bayar': total_bayar,
+        'sisa_pinjaman': sisa_pinjaman,
+        'kategori_pinjaman': pinjaman.id_kategori_jasa.kategori_jasa
+    })
+
+# Tambah pinjaman
 def tambah_pinjaman(request):
     if request.method == "POST":
         form = PinjamanForm(request.POST)
         if form.is_valid():
-            pinjaman = form.save(commit=False)  # Jangan simpan dulu, biar bisa dihitung jasa
-
-            # Mengambil nilai yang sudah diinput
+            pinjaman = form.save(commit=False) 
             jumlah_pinjaman = pinjaman.jumlah_pinjaman
-            jasa_persen = form.cleaned_data.get('jasa_persen')  # Ambil persentase jasa
+            jasa_persen = form.cleaned_data.get('jasa_persen')
 
-            # Pastikan nilai jasa_persen valid dan hitung jasa_rupiah jika persentase ada
-            if jasa_persen is not None and jumlah_pinjaman is not None:
-                jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100)
-                pinjaman.jasa_rupiah = round(jasa_rupiah, 2)  # Simpan jasa_rupiah yang dihitung
+            # hitung jasa sesuai kategori saat membuat
+            if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+                jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100 if jasa_persen else 0) 
+            else:
+                jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100 if jasa_persen else 0)
 
-            pinjaman.save()  # Simpan pinjaman dengan jasa_rupiah yang sudah dihitung
-            return redirect('pinjaman_list')  # Redirect ke halaman list pinjaman
-    else:
-        form = PinjamanForm()  # Form kosong jika request bukan POST
-
-    return render(request, 'pinjaman_form.html', {'form': form})  # Kembalikan form ke template
-
-
-
-def detail_pinjaman(request, id_pinjaman):
-    pinjaman = get_object_or_404(Pinjaman, id_pinjaman=id_pinjaman)
-    return render(request, 'detail_pinjaman.html', {'pinjaman': pinjaman})
-
-def bayar_pinjaman(request, id_pinjaman):
-    pinjaman = get_object_or_404(Pinjaman, id_pinjaman=id_pinjaman)
-
-    if request.method == 'POST':
-        form = PinjamanForm(request.POST)
-        if form.is_valid():
-            jumlah_dibayar = form.cleaned_data['jumlah_dibayar']
-            tanggal_bayar = form.cleaned_data['tanggal_bayar']
-
-            angsuran = Angsuran(
-                id_pinjaman=pinjaman,
-                id_admin=request.user.admin,
-                jumlah_bayar=jumlah_dibayar,
-                tanggal_bayar=tanggal_bayar
-            )
-            angsuran.save()
-
-            pinjaman.jumlah_pinjaman -= jumlah_dibayar
+            pinjaman.jasa_rupiah = round(jasa_rupiah, 2)
             pinjaman.save()
-
-            if pinjaman.jumlah_pinjaman <= 0:
-                pinjaman.status = 'Lunas'
-                pinjaman.save()
-
-            messages.success(request, f"Pembayaran sebesar {jumlah_dibayar} berhasil!")
-            return redirect('pinjaman:pinjaman_list')
+            return redirect('pinjaman_list')
     else:
         form = PinjamanForm()
 
-    return render(request, 'bayar_pinjaman.html', {'pinjaman': pinjaman, 'form': form})
+    return render(request, 'pinjaman_form.html', {'form': form})
+
+# Bayar pinjaman
+def bayar_pinjaman(request, id_pinjaman):
+    pinjaman = get_object_or_404(Pinjaman, id_pinjaman=id_pinjaman)
+
+    admin_id = request.session.get("admin_id")
+    if not admin_id:
+        messages.error(request, "Anda harus login sebagai admin terlebih dahulu.")
+        return redirect("login")
+    admin_login = get_object_or_404(Admin, id_admin=admin_id)
+
+    angsuran_pokok = pinjaman.angsuran_per_bulan or 0
+    jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
+    sisa_pinjaman = pinjaman.jumlah_pinjaman - (jumlah_cicilan_terbayar * angsuran_pokok)
+
+    # hitung jasa sesuai kategori
+    if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+        jasa_rupiah = sisa_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+    else:
+        jasa_rupiah = pinjaman.jumlah_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+
+    jumlah_cicilan_total = angsuran_pokok + jasa_rupiah
+
+    if request.method == "POST":
+        tanggal_bayar = request.POST.get("tanggal_bayar")
+        jumlah_dibayar = request.POST.get("jumlah_dibayar")
+        if jumlah_dibayar and tanggal_bayar:
+            Angsuran.objects.create(
+                id_pinjaman=pinjaman,
+                id_admin=admin_login,
+                tanggal_bayar=tanggal_bayar,
+                jumlah_bayar=jumlah_dibayar
+            )
+
+            # cek sisa pinjaman terbaru
+            total_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
+            sisa_akhir = pinjaman.jumlah_pinjaman - (total_cicilan_terbayar * angsuran_pokok)
+            if sisa_akhir <= 0:
+                pinjaman.status = "Lunas"
+                pinjaman.save()
+
+            messages.success(request, "Pembayaran angsuran berhasil dicatat.")
+            return redirect("pinjaman_list")
+
+    return render(request, "bayar_pinjaman.html", {
+        "pinjaman": pinjaman,
+        "total_bayar": Angsuran.objects.filter(id_pinjaman=pinjaman).aggregate(
+            total=Sum('jumlah_bayar')
+        )['total'] or 0,
+        "sisa_pinjaman": sisa_pinjaman,
+        "angsuran_pokok": angsuran_pokok,
+        "jasa_rupiah": round(jasa_rupiah, 2),
+        "jumlah_cicilan_total": round(jumlah_cicilan_total, 2),
+        "admin_login": admin_login,
+    })
+
+
+def detail_pembayaran(request, pembayaran_id):
+    pembayaran = get_object_or_404(Angsuran, id_pembayaran=pembayaran_id)
+    pinjaman = pembayaran.id_pinjaman
+    angsuran_pokok = pinjaman.angsuran_per_bulan or 0
+
+    semua_cicilan = Angsuran.objects.filter(id_pinjaman=pinjaman).order_by('tanggal_bayar', 'id_pembayaran')
+
+    sisa_pinjaman = pinjaman.jumlah_pinjaman
+    sisa_sebelum = sisa_pinjaman
+    sisa_setelah = sisa_pinjaman
+
+    for cicilan in semua_cicilan:
+        if cicilan.id_pembayaran == pembayaran.id_pembayaran:
+            sisa_sebelum = sisa_pinjaman
+            sisa_pinjaman -= angsuran_pokok
+            sisa_setelah = sisa_pinjaman
+            break
+        else:
+            sisa_pinjaman -= angsuran_pokok
+
+    if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+        jasa_rupiah = sisa_sebelum * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+    else:
+        jasa_rupiah = pinjaman.jumlah_pinjaman * (pinjaman.jasa_persen / 100 if pinjaman.jasa_persen else 0)
+
+    return render(request, 'detail_pembayaran.html', {
+        'pembayaran': pembayaran,
+        'sisa_sebelum': sisa_sebelum,
+        'sisa_setelah': sisa_setelah,
+        'jasa_rupiah': round(jasa_rupiah, 2),
+    })
