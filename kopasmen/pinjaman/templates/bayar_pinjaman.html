@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayar Pinjaman</title>
+</head>
+<body>
+
+    <h1>Bayar Pinjaman</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div>
+            <label>Nama Anggota:</label>
+            <input type="text" value="{{ pinjaman.nomor_anggota }}" disabled>
+        </div>
+
+        <div>
+            <label>Pinjaman:</label>
+            <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman }}" disabled>
+        </div>
+
+        <div>
+            <label>Sisa Pinjaman:</label>
+            <input type="text" value="Rp. {{ sisa_pinjaman }}" disabled>
+        </div>
+
+        <div>
+            <label>Tanggal:</label>
+            <input type="date" name="tanggal_bayar" required>
+        </div>
+
+        <div>
+            <label>Jumlah Cicilan Pokok:</label>
+            <input type="number" value="{{ angsuran_pokok }}" step="0.01" disabled>
+        </div>
+
+        <div>
+            <label>Persentase Jasa:</label>
+            <input type="number" value="{{ pinjaman.jasa_persen }}" step="0.01" disabled>
+        </div>
+
+        <div>
+            <label>Jumlah Jasa (Rp):</label>
+            <input type="number" value="{{ jasa_rupiah }}" step="0.01" disabled>
+        </div>
+
+        <div>
+            <label>Jumlah Dibayar (Cicilan + Jasa):</label>
+            <input type="number" name="jumlah_dibayar" value="{{ jumlah_cicilan_total }}" step="0.01">
+        </div>
+        <div>
+            <label>Admin Bertugas:</label>
+            <input type="text" value="{{ admin_login.username }} ({{ admin_login.role }})" disabled>
+        </div>
+
+
+        <button type="submit">Bayar</button>
+        <a href="{% url 'pinjaman_list' %}">Batal</a>
+    </form>
+
+</body>
+</html>

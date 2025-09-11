@@ -20,12 +20,17 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(pattern_name='login', permanent=False)), 
-    path('', include('admin_koperasi.urls')),
+
+    # arahkan root ke login admin koperasi
+    path('', RedirectView.as_view(url='/admin_koperasi/login/', permanent=False)),
+
+    # routes apps
+    path('admin_koperasi/', include('admin_koperasi.urls')),
     path('anggota/', include('anggota.urls')),
     path('dashboard/', include('admin_koperasi.urls')),
     path('pinjaman/', include('pinjaman.urls')),
     path('simpanan/', include('simpanan.urls')),
-    path('api/', include('api.urls')), 
+    path('api/', include('api.urls')),
 ]
+
 

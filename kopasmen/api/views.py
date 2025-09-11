@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import LoginSerializer, AnggotaSerializer, ResetPasswordSerializer
 from anggota.models import Anggota
+from simpanan.models import Simpanan, Penarikan
+from .serializers import SimpananSerializer, PenarikanSerializer
+
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -61,3 +65,17 @@ class ResetPasswordView(APIView):
         anggota.save()
 
         return Response({"message": "Password berhasil direset"}, status=status.HTTP_200_OK)
+    
+
+class SimpananListView(APIView):
+    def get(self, request, nip):
+        simpanan = Simpanan.objects.filter(anggota__nip=nip).order_by('-tanggal_menyimpan')
+        serializer = SimpananSerializer(simpanan, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PenarikanListView(APIView):
+    def get(self, request, nip):
+        penarikan = Penarikan.objects.filter(anggota__nip=nip).order_by('-tanggal_penarikan')
+        serializer = PenarikanSerializer(penarikan, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
