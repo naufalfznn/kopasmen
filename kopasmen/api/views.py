@@ -21,7 +21,7 @@ class LoginView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if anggota.check_password(password):   # ✅ bawaan Django untuk verifikasi hash
+        if anggota.check_password(password): 
             data = AnggotaSerializer(anggota).data
             return Response(
                 {"message": "Login berhasil", "data": data},
@@ -57,7 +57,7 @@ class ResetPasswordView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        anggota.set_password(new_password)   # ✅ lebih aman & recommended
+        anggota.set_password(new_password)
         anggota.save()
 
         return Response({"message": "Password berhasil direset"}, status=status.HTTP_200_OK)
