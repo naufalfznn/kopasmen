@@ -5,6 +5,9 @@ from .models import Simpanan, Anggota
 from .forms import EditSimpananForm
 from django.db.models import Sum
 from django.contrib import messages
+from django.contrib import messages
+from django.contrib import messages
+from django.contrib import messages
 
 def tambah_simpanan(request):
     if request.method == "POST":
@@ -65,6 +68,7 @@ def detail_simpanan(request, nomor_anggota):
 def edit_simpanan(request, nomor_anggota):
     anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
     simpanan_list = Simpanan.objects.filter(anggota=anggota)
+
 
     pokok = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Pokok").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
     wajib = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Wajib").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
