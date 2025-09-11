@@ -66,7 +66,6 @@ def edit_simpanan(request, nomor_anggota):
     anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
     simpanan_list = Simpanan.objects.filter(anggota=anggota)
 
-    # hitung total per jenis
     pokok = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Pokok").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
     wajib = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Wajib").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
     sukarela = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Sukarela").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
