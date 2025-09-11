@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Q, F
 from .forms import SimpananForm
 from .models import Simpanan, Anggota
+from .forms import EditSimpananForm
+from django.db.models import Sum
+from django.contrib import messages
 
 def tambah_simpanan(request):
     if request.method == "POST":
@@ -59,4 +62,69 @@ def detail_simpanan(request, nomor_anggota):
 
     return render(request, "detail_simpanan.html", context)
 
+def edit_simpanan(request, nomor_anggota):
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
+    simpanan_list = Simpanan.objects.filter(anggota=anggota)
 
+    # hitung total per jenis
+    pokok = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Pokok").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
+    wajib = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Wajib").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
+    sukarela = simpanan_list.filter(jenis_simpanan__nama_jenis="Simpanan Sukarela").aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
+
+    if request.method == "POST":
+        form = EditSimpananForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            if cd['simpanan_pokok']:
+                Simpanan.objects.create(
+                    anggota=anggota,
+                    admin=cd['admin'],
+                    jenis_simpanan_id=1, 
+                    tanggal_menyimpan=cd['tanggal_menyimpan'],
+                    jumlah_menyimpan=cd['simpanan_pokok'],
+                )
+            if cd['simpanan_wajib']:
+                Simpanan.objects.create(
+                    anggota=anggota,
+                    admin=cd['admin'],
+                    jenis_simpanan_id=2, 
+                    tanggal_menyimpan=cd['tanggal_menyimpan'],
+                    jumlah_menyimpan=cd['simpanan_wajib'],
+                )
+            if cd['simpanan_sukarela']:
+                Simpanan.objects.create(
+                    anggota=anggota,
+                    admin=cd['admin'],
+                    jenis_simpanan_id=3,
+                    tanggal_menyimpan=cd['tanggal_menyimpan'],
+                    jumlah_menyimpan=cd['simpanan_sukarela'],
+                )
+            return redirect("detail_simpanan", nomor_anggota=nomor_anggota)
+    else:
+        form = EditSimpananForm(initial={
+            "anggota": anggota.pk,
+            "admin": simpanan_list.first().admin if simpanan_list.exists() else None,
+            "tanggal_menyimpan": simpanan_list.first().tanggal_menyimpan if simpanan_list.exists() else None,
+            "simpanan_pokok": pokok,
+            "simpanan_wajib": wajib,
+            "simpanan_sukarela": sukarela,
+        })
+
+    return render(request, "edit_simpanan.html", {
+        "form": form,
+        "anggota": anggota,
+    })
+
+def hapus_simpanan(request, nomor_anggota):
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
+    simpanan = Simpanan.objects.filter(anggota=anggota)
+
+    if request.method == "POST":
+        count, _ = simpanan.delete()
+        messages.success(request, f"{count} data simpanan untuk {anggota.nama} berhasil dihapus.")
+        return redirect("daftar_simpanan")
+
+    return render(request, "hapus_simpanan.html", {
+        "anggota": anggota,
+        "simpanan": simpanan,
+    })

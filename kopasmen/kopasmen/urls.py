@@ -26,5 +26,6 @@ urlpatterns = [
     path('dashboard/', include('admin_koperasi.urls')),
     path('pinjaman/', include('pinjaman.urls')),
     path('simpanan/', include('simpanan.urls')),
+    path('api/', include('api.urls')), 
 ]
 

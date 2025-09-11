@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Detail Pembayaran</title>
+
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Detail Pembayaran</h1>
+
+    <div class="card-custom">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label><strong>Nama Anggota:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.nomor_anggota.nama }}">
+            </div>
+            <div class="col-md-6">
+                <label><strong>Jenis Pinjaman:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.id_jenis_pinjaman.nama_jenis }}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label><strong>Jumlah Cicilan:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.id_pinjaman.angsuran_per_bulan }}">
+            </div>
+            <div class="col-md-6">
+                <label><strong>Persentase Jasa:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.jasa_persen }} %">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label><strong>Jumlah Jasa (Rp):</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.id_pinjaman.jasa_rupiah }}">
+            </div>
+            <div class="col-md-6">
+                <label><strong>Jumlah Dibayar:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.jumlah_bayar }}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label><strong>Admin:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_admin.username }}">
+            </div>
+            <div class="col-md-6">
+                <label><strong>Tanggal Bayar:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.tanggal_bayar|date:'d M Y' }}">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label><strong>Sisa Pinjaman Sebelum Bayar:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ sisa_sebelum|floatformat:2 }}">
+            </div>
+            <div class="col-md-6">
+                <label><strong>Sisa Pinjaman Setelah Bayar:</strong></label>
+                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ sisa_setelah|floatformat:2 }}">
+            </div>
+        </div>
+    </div>
+
+
+        <a href="{% url 'detail_pinjaman' pembayaran.id_pinjaman.id_pinjaman %}" class="btn btn-secondary">Kembali ke Detail Pinjaman</a>
+
+
+</div>
+</body>
+</html>

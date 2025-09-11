@@ -1,30 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Pinjaman</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #FFD700; /* Kuning */
+            color: black;
+        }
+        tr:nth-child(even) {
+            background: #f4f4f4;
+        }
+        tr:nth-child(odd) {
+            background: #e0e0e0;
+        }
+        .aksi a {
+            margin: 0 5px;
+            text-decoration: none;
+            font-weight: bold;
+            color: brown;
+        }
+    </style>
 </head>
 <body>
-    <h1>Daftar Simpanan</h1>
-<a href="{% url 'tambah_simpanan' %}">Tambah Simpanan</a>
-<table border="1">
-    <tr>
-        <th>Anggota</th>
-        <th>Jenis</th>
-        <th>Tanggal</th>
-        <th>Jumlah</th>
-        <th>Admin</th>
-    </tr>
-    {% for s in simpanan %}
-    <tr>
-        <td>{{ s.id_anggota.nama }}</td>
-        <td>{{ s.id_jenis_simpanan.nama_jenis }}</td>
-        <td>{{ s.tanggal_menyimpan }}</td>
-        <td>{{ s.jumlah_menyimpan }}</td>
-        <td>{{ s.id_admin.username }}</td>
-    </tr>
-    {% endfor %}
-</table>
+    <h1>Daftar Pinjaman</h1>
+    <a href="{% url 'tambah_pinjaman' %}" style="display:inline-block;margin:10px 0;padding:8px 12px;background:#FFD700;color:black;text-decoration:none;border-radius:5px;font-weight:bold;">+ Tambah Pinjaman</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nomor Anggota</th>
+                <th>Nama Anggota</th>
+                <th>Pinjaman Reguler</th>
+                <th>Pinjaman Khusus</th>
+                <th>Pinjaman Barang</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anggota, jenis_pinjaman_dict in pinjaman_dict.items %}
+                <tr>
+                    <td>{{ jenis_pinjaman_dict.nomor_anggota }}</td>
+                    <td>{{ anggota }}</td>
+                    <td>{{ jenis_pinjaman_dict.Reguler }}</td>
+                    <td>{{ jenis_pinjaman_dict.Khusus }}</td>
+                    <td>{{ jenis_pinjaman_dict.Barang }}</td>
+                    <td class="aksi">
+                        <a href="{% url 'pinjaman_anggota_detail' jenis_pinjaman_dict.nomor_anggota %}">Detail</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center;">Belum ada data pinjaman</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

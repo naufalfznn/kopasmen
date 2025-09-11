@@ -19,13 +19,16 @@
   </style>
 </head>
 <body>
+
   <h2>Daftar Simpanan Anggota</h2>
+
+  <a href="{% url 'tambah_simpanan' %}">Tambah Simpanan</a>
 
   <table>
     <thead>
       <tr>
-        <th>Nama Anggota</th>
         <th>Nomor Anggota</th>
+        <th>Nama Anggota</th>
         <th>Jumlah Pokok</th>
         <th>Jumlah Wajib</th>
         <th>Jumlah Sukarela</th>
@@ -35,15 +38,15 @@
     <tbody>
       {% for row in data %}
       <tr>
-        <td>{{ row.nama_anggota }}</td>
         <td>{{ row.no_anggota }}</td>
+        <td>{{ row.nama_anggota }}</td>
         <td>{{ row.total_pokok|default:"0" }}</td>
         <td>{{ row.total_wajib|default:"0" }}</td>
         <td>{{ row.total_sukarela|default:"0" }}</td>
         <td>
           <a href="{% url 'detail_simpanan' row.kode_anggota %}">Detail</a> | 
-          <a href="#">Edit</a> | 
-          <a href="#">Hapus</a>
+          <a href="{% url 'edit_simpanan' row.kode_anggota %}">Edit</a> | 
+          <a href="{% url 'hapus_simpanan' row.kode_anggota %}">Hapus</a>
         </td>
       </tr>
       {% endfor %}
