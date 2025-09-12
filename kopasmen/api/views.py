@@ -5,6 +5,8 @@ from .serializers import LoginSerializer, AnggotaSerializer, ResetPasswordSerial
 from anggota.models import Anggota
 from simpanan.models import Simpanan, Penarikan
 from .serializers import SimpananSerializer, PenarikanSerializer
+from pinjaman.models import Pinjaman, Angsuran
+from .serializers import PinjamanSerializer, AngsuranSerializer
 
 
 
@@ -77,5 +79,17 @@ class PenarikanListView(APIView):
     def get(self, request, nip):
         penarikan = Penarikan.objects.filter(anggota__nip=nip).order_by('-tanggal_penarikan')
         serializer = PenarikanSerializer(penarikan, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PinjamanListView(APIView):
+    def get(self, request, nip):
+        pinjaman = Pinjaman.objects.filter(nomor_anggota__nip=nip).order_by("-tanggal_meminjam")
+        serializer = PinjamanSerializer(pinjaman, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class AngsuranListView(APIView):
+    def get(self, request, id_pinjaman):
+        angsuran = Angsuran.objects.filter(id_pinjaman=id_pinjaman).order_by("-tanggal_bayar")
+        serializer = AngsuranSerializer(angsuran, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
