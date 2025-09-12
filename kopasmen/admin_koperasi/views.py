@@ -23,7 +23,7 @@ def login_view(request):
                     request.session['admin_id'] = admin.id_admin
                     request.session['admin_username'] = admin.username
                     request.session['admin_role'] = admin.role
-                    return redirect(reverse('dashboard'))
+                    return redirect('admin_koperasi:dashboard')
                 else:
                     messages.error(request, "Username atau password salah.")
     else:
@@ -33,11 +33,11 @@ def login_view(request):
 def logout_view(request):
     request.session.flush()
     messages.info(request, "Logout berhasil.")
-    return redirect('login')
+    return redirect('admin_koperasi:login')
 
 def dashboard_view(request):
     if not request.session.get('admin_id'):
-        return redirect('login')
+        return redirect('admin_koperasi:login')
 
     role = request.session.get('admin_role')
     username = request.session.get('admin_username')

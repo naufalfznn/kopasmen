@@ -27,7 +27,7 @@ urlpatterns = [
     # routes apps
     path('admin_koperasi/', include('admin_koperasi.urls')),
     path('anggota/', include('anggota.urls')),
-    path('dashboard/', include('admin_koperasi.urls')),
+    path('dashboard/', include('admin_koperasi.urls', namespace='admin_koperasi')),
     path('pinjaman/', include('pinjaman.urls')),
     path('simpanan/', include('simpanan.urls')),
     path('api/', include('api.urls')),
