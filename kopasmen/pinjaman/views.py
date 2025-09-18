@@ -4,50 +4,35 @@ from .models import Pinjaman, Angsuran, Anggota, Admin
 from .forms import PinjamanForm
 from django.db.models import Sum
 
-
-
-def pinjaman_list(request, nomor_anggota=None):
-    if not request.session.get('admin_id'):
-        return redirect('admin_koperasi:login')
-
-    role = request.session.get('admin_role')
-    username = request.session.get('admin_username')
-
-    pinjaman_list = Pinjaman.objects.select_related("nomor_anggota", "id_jenis_pinjaman").all()
+def pinjaman_list(request):
+    pinjaman_list = Pinjaman.objects.all()
 
     pinjaman_dict = {}
     for pinjaman in pinjaman_list:
-        anggota = pinjaman.nomor_anggota
-        nama = anggota.nama
-        nomor = anggota.nomor_anggota
+        anggota = pinjaman.nomor_anggota.nama
+        nomor_anggota = pinjaman.nomor_anggota.nomor_anggota
         jenis_pinjaman = pinjaman.id_jenis_pinjaman.nama_jenis
-
-        if nomor not in pinjaman_dict:
-            pinjaman_dict[nomor] = {
-                "nomor_anggota": nomor,
-                "nama": nama,
-                "reguler": 0,
-                "khusus": 0,
-                "barang": 0,
+        if anggota not in pinjaman_dict:
+            pinjaman_dict[anggota] = {
+                'nomor_anggota': nomor_anggota,
+                'Reguler': 0,
+                'Khusus': 0,
+                'Barang': 0,
+                'pinjaman_ids': []
             }
-
+        
         jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=pinjaman).count()
         angsuran_pokok = pinjaman.angsuran_per_bulan or 0
         sisa_pinjaman = pinjaman.jumlah_pinjaman - (jumlah_cicilan_terbayar * angsuran_pokok)
 
-        if jenis_pinjaman.lower() == "reguler":
-            pinjaman_dict[nomor]["reguler"] += sisa_pinjaman
-        elif jenis_pinjaman.lower() == "khusus":
-            pinjaman_dict[nomor]["khusus"] += sisa_pinjaman
-        elif jenis_pinjaman.lower() == "barang":
-            pinjaman_dict[nomor]["barang"] += sisa_pinjaman
+        if jenis_pinjaman == 'Reguler':
+            pinjaman_dict[anggota]['Reguler'] += sisa_pinjaman
+        elif jenis_pinjaman == 'Khusus':
+            pinjaman_dict[anggota]['Khusus'] += sisa_pinjaman
+        elif jenis_pinjaman == 'Barang':
+            pinjaman_dict[anggota]['Barang'] += sisa_pinjaman
 
-    context = {
-        "pinjaman_dict": pinjaman_dict,
-        "username": username,
-        "role": role,
-    }
-    return render(request, "pinjaman_list.html", context)
+    return render(request, 'pinjaman_list.html', {'pinjaman_dict': pinjaman_dict})
 
 def pinjaman_anggota(request, nomor_anggota=None):
     anggota_data = {}
