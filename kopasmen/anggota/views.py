@@ -1,5 +1,6 @@
+from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.core.paginator import Paginator
 from admin_koperasi.models import Admin
 from .models import Anggota
 from .forms import AdminForm, AnggotaForm
@@ -9,6 +10,25 @@ def kelola_akun_view(request):
     anggotas = Anggota.objects.all() 
     admins = Admin.objects.all()
     return render(request, 'kelola_akun.html', {'anggotas': anggotas, 'admins': admins})
+
+def kelola_akun(request):
+    admins = Admin.objects.all().order_by("id_admin")
+    anggotas = Anggota.objects.all().order_by("nomor_anggota")
+
+    # Pagination
+    admin_paginator = Paginator(admins, 20)   # 20 per halaman
+    anggota_paginator = Paginator(anggotas, 20)
+
+    admin_page_number = request.GET.get("page_admin")
+    anggota_page_number = request.GET.get("page_anggota")
+
+    admin_page = admin_paginator.get_page(admin_page_number)
+    anggota_page = anggota_paginator.get_page(anggota_page_number)
+
+    return render(request, "kelola_akun.html", {
+        "admins": admin_page,
+        "anggotas": anggota_page,
+    })
 
 def tambah_admin(request):
     if request.method == 'POST':
@@ -53,6 +73,7 @@ def tambah_anggota(request):
     else:
         form = AnggotaForm() 
     return render(request, 'form_admin.html', {'form': form, 'judul': 'Tambah Anggota'})
+
 
 def anggota_detail(request, nomor_anggota):
     try:
@@ -207,5 +228,159 @@ def export_pdf_anggota(request):
     elements.append(table)
     doc.build(elements)
     return response
+
+from django.shortcuts import render, redirect
+from django.db.models import Sum
+from admin_koperasi.models import Admin  # import dari app admin_koperasi
+from .models import Anggota  # model anggota ada di app ini
+from django.contrib import messages
+
+def kelola_akun_view(request):
+    # cek session login
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    admins = Admin.objects.all()
+    anggotas = Anggota.objects.all()
+
+    context = {
+        'username': username,
+        'role': role,
+        'admins': admins,
+        'anggotas': anggotas,
+    }
+
+    return render(request, 'kelola_akun.html', context)
+
+def tambah_admin(request):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    if request.method == 'POST':
+        form = AdminForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Admin berhasil ditambahkan.")
+            return redirect('kelola_akun')
+    else:
+        form = AdminForm()
+
+    context = {
+        'form': form,
+        'judul': 'Tambah Admin',
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'form_admin.html', context)
+
+def tambah_anggota(request):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    if request.method == 'POST':
+        form = AnggotaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Anggota berhasil ditambahkan.")
+            return redirect('kelola_akun')
+    else:
+        form = AnggotaForm()
+
+    context = {
+        'form': form,
+        'judul': 'Tambah Anggota',
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'form_admin.html', context)
+
+def edit_admin(request, id_admin):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    admin = get_object_or_404(Admin, id_admin=id_admin)
+    form = AdminForm(request.POST or None, instance=admin)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Admin berhasil diperbarui.")
+        return redirect('kelola_akun')
+
+    context = {
+        'form': form,
+        'judul': 'Edit Admin',
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'form_admin.html', context)
+
+def edit_anggota(request, nomor_anggota):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
+    form = AnggotaForm(request.POST or None, instance=anggota)
+    if form.is_valid():
+        form.save()
+        messages.success(request, "Anggota berhasil diperbarui.")
+        return redirect('kelola_akun')
+
+    context = {
+        'form': form,
+        'judul': 'Edit Anggota',
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'form_anggota.html', context)
+
+def detail_admin(request, id_admin):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    admin = get_object_or_404(Admin, id_admin=id_admin)
+    all_admins = Admin.objects.order_by('id_admin')
+    nomor_urut = list(all_admins).index(admin) + 1  
+
+    context = {
+        'admin': admin,
+        'nomor_urut': nomor_urut,
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'detailA.html', context)
+
+def detail_anggota(request, nomor_anggota):
+    if not request.session.get('admin_id'):
+        return redirect('admin_koperasi:login')
+
+    role = request.session.get('admin_role')
+    username = request.session.get('admin_username')
+
+    anggota = get_object_or_404(Anggota, nomor_anggota=nomor_anggota)
+
+    context = {
+        'anggota': anggota,
+        'username': username,
+        'role': role,
+    }
+    return render(request, 'detail.html', context)
+
 
 

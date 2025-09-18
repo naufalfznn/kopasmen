@@ -4,6 +4,12 @@ from django.contrib import messages
 from .models import Admin
 from .forms import LoginForm
 
+# import model lain
+from anggota.models import Anggota
+from simpanan.models import Simpanan
+from pinjaman.models import Pinjaman
+from django.db.models import Sum
+
 ALLOWED_ROLES = {'ketua', 'sekretaris', 'bendahara'}
 
 def login_view(request):
@@ -30,10 +36,12 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
+
 def logout_view(request):
     request.session.flush()
     messages.info(request, "Logout berhasil.")
     return redirect('admin_koperasi:login')
+
 
 def dashboard_view(request):
     if not request.session.get('admin_id'):
@@ -42,11 +50,31 @@ def dashboard_view(request):
     role = request.session.get('admin_role')
     username = request.session.get('admin_username')
 
+    context = {
+        'username': username,
+        'role': role,
+    }
+
     if role == 'ketua':
+        jumlah_admin = Admin.objects.count()
+        jumlah_anggota = Anggota.objects.count()
+        jumlah_simpanan = Simpanan.objects.aggregate(total=Sum('jumlah_menyimpan'))['total'] or 0
+        jumlah_pinjaman = Pinjaman.objects.aggregate(total=Sum('jumlah_pinjaman'))['total'] or 0
+
+        context.update({
+            'jumlah_admin': jumlah_admin,
+            'jumlah_anggota': jumlah_anggota,
+            'jumlah_simpanan': jumlah_simpanan,
+            'jumlah_pinjaman': jumlah_pinjaman,
+        })
+
         tpl = 'dashboard_ketua.html'
+
     elif role == 'sekretaris':
         tpl = 'dashboard_sekretaris.html'
+
     elif role == 'bendahara':
         tpl = 'dashboard_bendahara.html'
 
-    return render(request, tpl, {'username': username, 'role': role})
+    return render(request, tpl, context)
+

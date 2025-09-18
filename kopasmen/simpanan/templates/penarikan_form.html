@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Form Simpanan</title>
+    <title>Form Penarikan</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -111,19 +111,15 @@
 </head>
 <body>
     {% include "partials/sidebar.html" %}
+    <h2>Form Penarikan Simpanan</h2>
 
-    <div class="main-content">
-        <div class="content-card">
-            <h1>{{ judul }}</h1>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="form-actions">
-                    <button type="submit">💾 Simpan</button>
-                    <a href="{% url 'daftar_simpanan' %}" class="cancel-btn">❌ Batal</a>
-                </div>
-            </form>
-        </div>
-    </div>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Simpan</button>
+    </form>
+
+    <p><a href="{% url 'daftar_simpanan' %}">Lihat Daftar Penarikan</a></p>
 </body>
 </html>

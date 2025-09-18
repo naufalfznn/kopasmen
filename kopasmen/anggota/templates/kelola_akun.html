@@ -4,126 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Akun</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            flex: 1;
+        }
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        h1 { margin-bottom: 20px; color: #4A2C2A; }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px;
+        }
+        .section-title { font-size: 20px; font-weight: bold; }
+        .add-button {
+            background: #FFD700; padding: 8px 12px;
+            border-radius: 6px; text-decoration: none;
+            color: #333; font-weight: bold;
+        }
+        .add-button:hover { background: #e6c200; }
+        .search-box input {
+            padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;
+        }
+        table {
+            width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px;
+        }
+        th { background: #FFD700; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .action-links { display: flex; gap: 10px; }
+        .btn {
+            padding: 5px 10px; border-radius: 6px;
+            text-decoration: none; font-size: 13px; color: white;
+        }
+        .btn-view { background: #007bff; }
+        .btn-edit { background: #28a745; }
+        .btn-delete { background: #dc3545; }
+        .btn:hover { opacity: 0.9; }
+        .empty-state { text-align: center; font-style: italic; color: #999; }
+        .pagination { margin-top: 15px; text-align: center; }
+        .pagination a {
+            padding: 6px 12px; margin: 0 5px;
+            border-radius: 6px; background: #FFD700;
+            color: #333; text-decoration: none; font-weight: bold;
+        }
+        .pagination span { margin: 0 10px; font-size: 14px; color: #555; }
+        .pagination a:hover { background: #e6c200; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            
-            <ul class="nav-menu">
-                <li><a href="{% url 'admin_koperasi:dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'kelola_akun' %}">Manajemen Anggota</a></li>
-            </ul>
-            
-            <div class="logout">
-                <a href="{% url 'admin_koperasi:logout' %}">Logout</a>
-            </div>
-        </aside>
-            
-        <h1>Manajemen Anggota</h1>
 
-        <div class="content">
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Daftar Admin</h2>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <div class="search-box">
-                            <input type="text" placeholder="Cari Nama Admin...">
-                        </div>
-                        <a href="{% url 'tambah_admin' %}" class="add-button">+ Tambah Admin</a>
+    {% include "partials/sidebar.html" %}
+
+    <div class="main-content">
+        
+        <!-- Card Admin -->
+        <div class="content-card">
+            <h1>Manajemen Admin</h1>
+            <div class="section-header">
+                <h2 class="section-title">Daftar Admin</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="search-box">
+                        <input type="text" id="searchAdmin" placeholder="Cari Nama Admin...">
                     </div>
-                </div>
-                
-                <div class="table-container">
-                    <table border="1">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for admin in admins %}
-                           <tr>
-                                <td>{{ forloop.counter }}</td> 
-                                <td>{{ admin.username }}</td>
-                                <td>{{ admin.role }}</td>
-                                <td class="action-links">
-                                    <a href="{% url 'edit_admin' admin.id_admin %}" class="btn btn-edit">Edit</a>
-                                    <a href="{% url 'detail_admin' admin.id_admin %}" class="btn btn-view">Lihat</a>
-                                    <a href="{% url 'hapus_admin' admin.id_admin %}" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus admin ini?');">Hapus</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="empty-state">Tidak ada data admin</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <a href="{% url 'tambah_admin' %}" class="add-button">+ Tambah Admin</a>
                 </div>
             </div>
-            
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Daftar Anggota</h2>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <div class="search-box">
-                            <input type="text" placeholder="Cari Nama Anggota...">
-                        </div>
-                        <a href="{% url 'tambah_anggota' %}" class="add-button">+ Tambah Anggota</a>
-                        <a href="{% url 'export_excel_anggota' %}" class="add-button">📊 Download Excel</a>
-                        <a href="{% url 'export_pdf_anggota' %}" class="add-button">📄 Download PDF</a>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>User</th><th>Role</th><th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in admins %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ admin.username }}</td>
+                            <td>{{ admin.role }}</td>
+                            <td class="action-links">
+                                <a href="{% url 'edit_admin' admin.id_admin %}" class="btn btn-edit">Edit</a>
+                                <a href="{% url 'detail_admin' admin.id_admin %}" class="btn btn-view">Lihat</a>
+                                <a href="{% url 'hapus_admin' admin.id_admin %}" class="btn btn-delete"
+                                   onclick="return confirm('Yakin ingin menghapus admin ini?');">Hapus</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="empty-state">Tidak ada data admin</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination Admin -->
+            <div class="pagination">
+                {% if admins.has_previous %}
+                    <a href="?page_admin={{ admins.previous_page_number }}">⬅ Prev</a>
+                {% endif %}
+                <span>Halaman {{ admins.number }} dari {{ admins.paginator.num_pages }}</span>
+                {% if admins.has_next %}
+                    <a href="?page_admin={{ admins.next_page_number }}">Next ➡</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Card Anggota -->
+        <div class="content-card">
+            <h1>Manajemen Anggota</h1>
+            <div class="section-header">
+                <h2 class="section-title">Daftar Anggota</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="search-box">
+                        <input type="text" id="searchAnggota" placeholder="Cari Nama Anggota...">
                     </div>
+                    <a href="{% url 'tambah_anggota' %}" class="add-button">+ Tambah Anggota</a>
+                    <a href="{% url 'export_excel_anggota' %}" class="add-button">📊 Download Excel</a>
+                    <a href="{% url 'export_pdf_anggota' %}" class="add-button">📄 Download PDF</a>
                 </div>
-                
-                <div class="table-container">
-                    <table border="1">
-                        <thead>
-                            <tr>
-                                <th>No. Anggota</th>
-                                <th>Nama</th>
-                                <th>NIP</th>
-                                <th>Alamat</th>
-                                <th>No. Telepon</th>
-                                <th>Email</th>
-                                <th>Jenis Kelamin</th>
-                                <th>Tanggal Daftar</th>
-                                <th>Status</th>
-                                <th>Alasan Tidak Aktif</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for anggota in anggotas %}
-                            <tr>
-                                <td>{{ anggota.nomor_anggota }}</td>
-                                <td>{{ anggota.nama }}</td>
-                                <td>{{ anggota.nip }}</td>
-                                <td>{{ anggota.alamat }}</td>
-                                <td>{{ anggota.no_telp }}</td>
-                                <td>{{ anggota.email }}</td>
-                                <td>{{ anggota.jenis_kelamin }}</td>
-                                <td>{{ anggota.tanggal_daftar|date:"d M Y" }}</td>
-                                <td>{{ anggota.status }}</td>
-                                <td>{{ anggota.alasan_tidak_aktif }}</td>
-                                <td class="action-links">
-                                    <a href="{% url 'detail_anggota' anggota.nomor_anggota %}" class="btn btn-view">Lihat</a>
-                                    <a href="{% url 'edit_anggota' anggota.nomor_anggota %}" class="btn btn-edit">Edit</a>
-                                    <a href="{% url 'hapus_anggota' anggota.nomor_anggota %}" class="btn btn-delete" onclick="return confirm('Yakin ingin menghapus anggota ini?');">Hapus</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="empty-state">Tidak ada data anggota</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="table-container">
+                <table class="anggota-table">
+                    <thead>
+                        <tr>
+                            <th>No. Anggota</th><th>Nama</th><th>NIP</th><th>Alamat</th>
+                            <th>No. Telepon</th><th>Email</th><th>Jenis Kelamin</th>
+                            <th>Tanggal Daftar</th><th>Status</th><th>Alasan Tidak Aktif</th><th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for anggota in anggotas %}
+                        <tr>
+                            <td>{{ anggota.nomor_anggota }}</td>
+                            <td>{{ anggota.nama }}</td>
+                            <td>{{ anggota.nip }}</td>
+                            <td>{{ anggota.alamat }}</td>
+                            <td>{{ anggota.no_telp }}</td>
+                            <td>{{ anggota.email }}</td>
+                            <td>{{ anggota.jenis_kelamin }}</td>
+                            <td>{{ anggota.tanggal_daftar|date:"d M Y" }}</td>
+                            <td>{{ anggota.status }}</td>
+                            <td>{{ anggota.alasan_tidak_aktif }}</td>
+                            <td class="action-links">
+                                <a href="{% url 'detail_anggota' anggota.nomor_anggota %}" class="btn btn-view">Lihat</a>
+                                <a href="{% url 'edit_anggota' anggota.nomor_anggota %}" class="btn btn-edit">Edit</a>
+                                <a href="{% url 'hapus_anggota' anggota.nomor_anggota %}" class="btn btn-delete"
+                                   onclick="return confirm('Yakin ingin menghapus anggota ini?');">Hapus</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="11" class="empty-state">Tidak ada data anggota</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination Anggota -->
+            <div class="pagination">
+                {% if anggotas.has_previous %}
+                    <a href="?page_anggota={{ anggotas.previous_page_number }}">⬅ Prev</a>
+                {% endif %}
+                <span>Halaman {{ anggotas.number }} dari {{ anggotas.paginator.num_pages }}</span>
+                {% if anggotas.has_next %}
+                    <a href="?page_anggota={{ anggotas.next_page_number }}">Next ➡</a>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Search Realtime -->
+    <script>
+    function filterTable(inputId, tableSelector, colIndex) {
+        const input = document.getElementById(inputId);
+        const filter = input.value.toLowerCase();
+        const table = document.querySelector(tableSelector);
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) { // skip header
+            let td = rows[i].getElementsByTagName("td")[colIndex];
+            if (td) {
+                let textValue = td.textContent || td.innerText;
+                rows[i].style.display = textValue.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+    }
+    document.getElementById("searchAdmin").addEventListener("keyup", function() {
+        filterTable("searchAdmin", ".admin-table", 1);
+    });
+    document.getElementById("searchAnggota").addEventListener("keyup", function() {
+        filterTable("searchAnggota", ".anggota-table", 1);
+    });
+    </script>
 </body>
 </html>

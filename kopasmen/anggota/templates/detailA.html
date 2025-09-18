@@ -1,12 +1,75 @@
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Admin</title>
+  <meta charset="UTF-8">
+  <title>Detail Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 60px;
+      margin-left: 300px; /* offset sidebar */
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      font-size: 20px;
+      color: #4b2e2e; /* cokelat tua */
+      text-decoration: none;
+      margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .back-link span {
+      margin-left: 8px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: bold;
+      color: #4b2e2e; /* cokelat */
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: #FFD700; /* kuning */
+      color: #4b2e2e; /* cokelat */
+      text-align: left;
+      padding: 10px;
+      width: 200px;
+      font-weight: bold;
+    }
+
+    td {
+      background-color: #f0f0f0; /* abu terang */
+      padding: 10px;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
+    {% include "partials/sidebar.html" %}
     <div class="container">
+      <a href="{% url 'kelola_akun' %}" class="back-link">
+      &#8592; <span>Detail Anggota</span>
+    </a>
         <h1>Detail Admin</h1>
 
         {% if admin %}
@@ -27,8 +90,6 @@
         {% else %}
         <p>{{ error }}</p>
         {% endif %}
-
-        <a href="{% url 'kelola_akun' %}">Kembali</a>
     </div>
 </body>
 </html>
