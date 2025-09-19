@@ -1,74 +1,180 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Detail Pembayaran</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Pembayaran</title>
+<style>
+  /* ===== Reset ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    display: flex;
+  }
+  a { text-decoration: none; color: inherit; }
 
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
+    padding: 20px 0;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+
+  /* ===== Main Content ===== */
+  .main-content {
+    margin-left: 280px;
+    padding: 30px;
+    flex: 1;
+  }
+
+  h1 {
+    color: #4A2C2A;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 25px;
+  }
+
+  /* ===== Card ===== */
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  }
+
+  .row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .col {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #4A2C2A;
+  }
+
+  input[readonly] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fffefc;
+    font-size: 14px;
+  }
+
+  /* Tombol Kembali */
+  .btn-back {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fffefc;
+    color: #4A2C2A;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .btn-back:hover {
+    background: #FFD700;
+    color: #333;
+  }
+
+  /* Responsive */
+  @media(max-width:768px){
+    .row { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
-<div class="container mt-4">
-    <h1>Detail Pembayaran</h1>
+
+  <div class="sidebar">
+    {% include "partials/sidebar.html" %}
+  </div>
+
+  <div class="main-content">
+    <h1>
+      <span>&larr;</span>
+      Detail Pembayaran
+    </h1>
 
     <div class="card-custom">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label><strong>Nama Anggota:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.nomor_anggota.nama }}">
-            </div>
-            <div class="col-md-6">
-                <label><strong>Jenis Pinjaman:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.id_jenis_pinjaman.nama_jenis }}">
-            </div>
+      <div class="row">
+        <div class="col">
+          <label>Nama Anggota:</label>
+          <input type="text" readonly value="{{ pembayaran.id_pinjaman.nomor_anggota.nama }}">
         </div>
+        <div class="col">
+          <label>Jenis Pinjaman:</label>
+          <input type="text" readonly value="{{ pembayaran.id_pinjaman.id_jenis_pinjaman.nama_jenis }}">
+        </div>
+      </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label><strong>Jumlah Cicilan:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.id_pinjaman.angsuran_per_bulan }}">
-            </div>
-            <div class="col-md-6">
-                <label><strong>Persentase Jasa:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_pinjaman.jasa_persen }} %">
-            </div>
+      <div class="row">
+        <div class="col">
+          <label>Jumlah Cicilan:</label>
+          <input type="text" readonly value="Rp. {{ pembayaran.id_pinjaman.angsuran_per_bulan|floatformat:'-2' }}">
         </div>
+        <div class="col">
+          <label>Persentase Jasa:</label>
+          <input type="text" readonly value="{{ pembayaran.id_pinjaman.jasa_persen|floatformat:'-2' }} %">
+        </div>
+      </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label><strong>Jumlah Jasa (Rp):</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.id_pinjaman.jasa_rupiah }}">
-            </div>
-            <div class="col-md-6">
-                <label><strong>Jumlah Dibayar:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ pembayaran.jumlah_bayar }}">
-            </div>
+      <div class="row">
+        <div class="col">
+          <label>Jumlah Jasa (Rp):</label>
+          <input type="text" readonly value="Rp. {{ pembayaran.id_pinjaman.jasa_rupiah|floatformat:'-2' }}">
         </div>
+        <div class="col">
+          <label>Jumlah Dibayar:</label>
+          <input type="text" readonly value="Rp. {{ pembayaran.jumlah_bayar|floatformat:'-2' }}">
+        </div>
+      </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label><strong>Admin:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.id_admin.username }}">
-            </div>
-            <div class="col-md-6">
-                <label><strong>Tanggal Bayar:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="{{ pembayaran.tanggal_bayar|date:'d M Y' }}">
-            </div>
+      <div class="row">
+        <div class="col">
+          <label>Admin:</label>
+          <input type="text" readonly value="{{ pembayaran.id_admin.username }}">
         </div>
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label><strong>Sisa Pinjaman Sebelum Bayar:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ sisa_sebelum|floatformat:2 }}">
-            </div>
-            <div class="col-md-6">
-                <label><strong>Sisa Pinjaman Setelah Bayar:</strong></label>
-                <input type="text" class="form-control-plaintext" readonly value="Rp. {{ sisa_setelah|floatformat:2 }}">
-            </div>
+        <div class="col">
+          <label>Tanggal Bayar:</label>
+          <input type="text" readonly value="{{ pembayaran.tanggal_bayar|date:'d M Y' }}">
         </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Sisa Pinjaman Sebelum Bayar:</label>
+          <input type="text" readonly value="Rp. {{ sisa_sebelum|floatformat:'-2' }}">
+        </div>
+        <div class="col">
+          <label>Sisa Pinjaman Setelah Bayar:</label>
+          <input type="text" readonly value="Rp. {{ sisa_setelah|floatformat:'-2' }}">
+        </div>
+      </div>
     </div>
 
+    <a href="{% url 'detail_pinjaman' pembayaran.id_pinjaman.id_pinjaman %}" class="btn-back">
+      &larr; Kembali ke Detail Pinjaman
+    </a>
 
-        <a href="{% url 'detail_pinjaman' pembayaran.id_pinjaman.id_pinjaman %}" class="btn btn-secondary">Kembali ke Detail Pinjaman</a>
+  </div>
 
-
-</div>
 </body>
 </html>

@@ -63,6 +63,30 @@
     .btn-delete { background: #dc3545; }
     .btn:hover { opacity: 0.9; }
     .empty-state { text-align: center; font-style: italic; color: #999; }
+
+    /* Pagination style */
+    .pagination {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .pagination a, .pagination span {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 0 3px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .pagination a {
+      background: #FFD700;
+      color: #333;
+    }
+    .pagination a:hover { background: #e6c200; }
+    .pagination .current {
+      background: #4A2C2A;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -79,7 +103,6 @@
             <input type="text" id="searchSimpanan" placeholder="Cari Nama Anggota...">
           </div>
           <a href="{% url 'tambah_simpanan' %}" class="add-button">+ Tambah Simpanan</a>
-          <a href="{% url 'penarikan_simpanan' %}" class="add-button">- Penarikan Simpanan</a>
         </div>
       </div>
 
@@ -100,14 +123,14 @@
             <tr>
               <td>{{ row.no_anggota }}</td>
               <td>{{ row.nama_anggota }}</td>
-              <td>{{ row.total_pokok|default:"0" }}</td>
-              <td>{{ row.total_wajib|default:"0" }}</td>
-              <td>{{ row.total_sukarela|default:"0" }}</td>
+              <td>Rp {{ row.total_pokok|default:"0" }}</td>
+              <td>Rp {{ row.total_wajib|default:"0" }}</td>
+              <td>Rp {{ row.total_sukarela|default:"0" }}</td>
               <td class="action-links">
-                <a href="{% url 'detail_simpanan' row.kode_anggota %}" class="btn btn-view">Detail</a>
+                <a href="{% url 'simpanan_anggota' row.kode_anggota %}" class="btn btn-view">Detail</a>
                 <a href="{% url 'edit_simpanan' row.kode_anggota %}" class="btn btn-edit">Edit</a>
-                <a href="{% url 'hapus_simpanan' row.kode_anggota %}" class="btn btn-delete"
-                   onclick="return confirm('Yakin ingin menghapus data simpanan ini?');">Hapus</a>
+                <a href="{% url 'hapus_simpanan' row.no_anggota %}" class="btn btn-delete"
+                          onclick="return confirm('Yakin ingin menghapus data simpanan ini?');">Hapus</a>
               </td>
             </tr>
             {% empty %}
@@ -116,17 +139,40 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page=1">« First</a>
+          <a href="?page={{ page_obj.previous_page_number }}">‹ Prev</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}">{{ num }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Next ›</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}">Last »</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Search realtime -->
   <script>
+    // Pencarian realtime
     document.getElementById("searchSimpanan").addEventListener("keyup", function() {
       const filter = this.value.toLowerCase();
       const rows = document.querySelectorAll(".simpanan-table tbody tr");
       rows.forEach(row => {
         const nama = row.cells[1]?.textContent.toLowerCase();
-        row.style.display = nama.includes(filter) ? "" : "none";
+        row.style.display = nama && nama.includes(filter) ? "" : "none";
       });
     });
   </script>

@@ -3,118 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <title>Form Tambah Pinjaman</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    {% load widget_tweaks %}
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 30px;
+            flex: 1;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h4 {
+            color: #4A2C2A;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #4A2C2A;
+        }
+
+        .btn-tambah {
+            background: #FFD700;
+            color: #333;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-tambah:hover {
+            background: #e6c200;
+            transform: translateY(-2px);
+        }
+
+        .btn-batal {
+            background: #ccc;
+            color: #333;
+            font-weight: bold;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            margin-left: 10px;
+        }
+
+        .btn-batal:hover {
+            background: #b3b3b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-batal i {
+            margin-right: 6px;
+        }
+
+        .alert {
+            padding: 15px;
+            background: #f8d7da;
+            color: #842029;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c2c7;
+        }
+    </style>
 </head>
+
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-9 form-container">
-            <div class="form-card">
-                <h4 class="mb-4">Form Tambah Pinjaman</h4>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Nama</label>
-                            {{ form.nomor_anggota }}
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Jenis Pinjaman</label>
-                            {{ form.id_jenis_pinjaman }}
-                        </div>
-                    </div>
+    {% include "partials/sidebar.html" %}
 
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Admin</label>
-                            {{ form.id_admin }}
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Tanggal Pinjam</label>
-                            {{ form.tanggal_meminjam }}
-                        </div>
+    <div class="main-content">
+        <div class="form-card">
+            <h4 class="mb-4">Form Tambah Pinjaman</h4>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Nama</label>
+                        {{ form.nomor_anggota|add_class:"form-control" }}
                     </div>
-
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Lama Pinjaman</label>
-                            {{ form.jatuh_tempo }}
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Jumlah Pinjaman</label>
-                            {{ form.jumlah_pinjaman }}
-                        </div>
+                    <div class="col-md-6">
+                        <label>Jenis Pinjaman</label>
+                        {{ form.id_jenis_pinjaman|add_class:"form-control" }}
                     </div>
+                </div>
 
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Jumlah Cicilan</label>
-                            {{ form.angsuran_per_bulan }}
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Kategori Jasa</label>
-                            {{ form.id_kategori_jasa }}
-                        </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Admin</label>
+                        {{ form.id_admin|add_class:"form-control" }}
                     </div>
-
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label">Persentase Jasa</label>
-                            <input type="text" id="id_jasa_persen" name="jasa_persen" class="form-control" step="0.01" min="0" required inputmode="decimal">
-                        </div>
-                        <div class="col">
-                            <label class="form-label">Jumlah Jasa</label>
-                            <input type="text" id="id_jasa_rupiah" name="jasa_rupiah" class="form-control" readonly>
-                        </div>
+                    <div class="col-md-6">
+                        <label>Tanggal Pinjam</label>
+                        {{ form.tanggal_meminjam|add_class:"form-control" }}
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Status Pembayaran</label>
-                        {{ form.status }}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Lama Pinjaman (bulan)</label>
+                        {{ form.jatuh_tempo|add_class:"form-control" }}
                     </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-tambah px-4">Tambah</button>
-                        <a href="{% url 'pinjaman_list' %}" class="btn btn-batal px-4">Batal</a>
+                    <div class="col-md-6">
+                        <label>Jumlah Pinjaman</label>
+                        {{ form.jumlah_pinjaman|add_class:"form-control"|attr:"id:id_jumlah_pinjaman" }}
                     </div>
+                </div>
 
-                    {% if form.errors %}
-                        <div class="alert alert-danger mt-4">
-                            <ul>
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-                </form>
-            </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Jumlah Cicilan</label>
+                        {{ form.angsuran_per_bulan|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-6">
+                        <label>Kategori Jasa</label>
+                        {{ form.id_kategori_jasa|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Persentase Jasa (%)</label>
+                        <input type="text" id="id_jasa_persen" name="jasa_persen" class="form-control" step="0.01" min="0" required inputmode="decimal">
+                    </div>
+                    <div class="col-md-6">
+                        <label>Jumlah Jasa (Rp)</label>
+                        <input type="text" id="id_jasa_rupiah" name="jasa_rupiah" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-tambah">Tambah</button>
+                    <a href="{% url 'pinjaman_list' %}" class="btn btn-batal">
+                        <i class="bi bi-arrow-left"></i> Batal
+                    </a>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert mt-4">
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </form>
         </div>
     </div>
-</div>
 
-<script>
-    function hitungJasa() {
-        var jumlahPinjaman = parseFloat(
-            document.getElementById('id_jumlah_pinjaman').value.replace(',', '.')
-        );
-        var jasaPersen = parseFloat(
-            document.getElementById('id_jasa_persen').value.replace(',', '.')
-        );
+    <script>
+        function hitungJasa() {
+            var jumlahPinjaman = parseFloat(
+                document.getElementById('id_jumlah_pinjaman').value.replace(',', '.')
+            );
+            var jasaPersen = parseFloat(
+                document.getElementById('id_jasa_persen').value.replace(',', '.')
+            );
 
-        if (!isNaN(jumlahPinjaman) && !isNaN(jasaPersen)) {
-            var jasaRupiah = (jumlahPinjaman * (jasaPersen / 100)).toFixed(2);
-            document.getElementById('id_jasa_rupiah').value = jasaRupiah;
-        } else {
-            document.getElementById('id_jasa_rupiah').value = '';
+            if (!isNaN(jumlahPinjaman) && !isNaN(jasaPersen)) {
+                var jasaRupiah = Math.round(jumlahPinjaman * (jasaPersen / 100));
+                document.getElementById('id_jasa_rupiah').value = jasaRupiah;
+            } else {
+                document.getElementById('id_jasa_rupiah').value = '';
+            }
         }
-    }
 
-
-    document.getElementById('id_jumlah_pinjaman').addEventListener('input', hitungJasa);
-    document.getElementById('id_jasa_persen').addEventListener('input', hitungJasa);
-</script>
+        document.getElementById('id_jumlah_pinjaman').addEventListener('input', hitungJasa);
+        document.getElementById('id_jasa_persen').addEventListener('input', hitungJasa);
+    </script>
 
 </body>
 </html>

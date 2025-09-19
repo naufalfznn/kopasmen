@@ -48,7 +48,7 @@
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger me-2">Ya, Hapus Semua</button>
-                <a href="{% url 'detail_simpanan' anggota.nomor_anggota %}" class="btn btn-secondary">Batal</a>
+                <a href="{% url 'simpanan_anggota' anggota.nomor_anggota %}" class="btn btn-secondary">Batal</a>
             </form>
         </div>
     </div>

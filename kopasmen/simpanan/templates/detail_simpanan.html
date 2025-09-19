@@ -2,219 +2,177 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Detail Simpanan</title>
+  <title>Detail Simpanan {{ simpanan.anggota.nama }}</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f7f7f7;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
       margin: 0;
-      padding-left: 300px; /* sidebar width */
+      display: flex;
     }
-
-    .container {
-      max-width: 900px;
-      margin: 20px;
-      padding: 20px;
+    .main-content {
+      margin-left: 280px;
+      padding: 30px;
+      flex: 1;
     }
-
-    .card {
-      margin-top: 40px;
-      background: #fff;
+    .content-card {
+      background: white;
       border-radius: 12px;
-      padding: 20px 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-      width: 1288px;
+      padding: 30px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
     }
-
-    .row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 15px;
+    h1, h2 { margin-bottom: 20px; color: #4A2C2A; }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px 30px;
+      margin-bottom: 20px;
     }
-
-    .field {
-      flex: 1 1 200px;
-    }
-
-    .field label {
-      font-weight: bold;
-      color: #444;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .field div {
-      padding: 8px 10px;
+    .detail-item {
       background: #fafafa;
-      border: 1px solid #e5e5e5;
-      border-radius: 6px;
-      word-break: break-word;
-    }
-
-    h3 {
-      margin: 20px 0 15px;
-      color: #333;
-    }
-
-    .search-box {
-      margin-bottom: 15px;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 15px;
-      outline: none;
-      transition: all 0.2s;
+      padding: 15px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
-
-    .search-box input:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 5px rgba(0,123,255,0.3);
-    }
-
-    .transaksi-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .transaksi {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .transaksi-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #333;
-    }
-
-    .jenis {
-      color: #007bff;
-    }
-
-    .desc {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .meta {
+    .detail-item .label {
       font-size: 13px;
       color: #777;
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .detail-item .value {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    .detail-item.highlight {
+      background: #fff8e1;
+      border: 1px solid #ffd54f;
+    }
+    .back-btn {
+      display: inline-block; margin-top: 20px;
+      background: #FFD700; padding: 8px 14px;
+      border-radius: 6px; text-decoration: none;
+      color: #333; font-weight: bold;
+    }
+    .back-btn:hover { background: #e6c200; }
+
+    /* Search input */
+    .filter-box {
+      display: flex; gap: 10px; margin-bottom: 15px;
+    }
+    .filter-box input {
+      padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc;
     }
 
-    .empty {
-      font-style: italic;
-      color: #888;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    .transaction-list {
+      list-style: none; padding: 0; margin: 0;
     }
-
-    @media(max-width:768px){
-      body {
-        padding-left: 0;
-      }
-      .container {
-        padding: 10px;
-      }
+    .transaction-item {
+      padding: 12px 15px; background: #fafafa; margin-bottom: 8px;
+      border-radius: 6px; display: flex; justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
+    .transaction-item span { display: inline-block; width: 30%; text-align: center; }
+    .empty-state { text-align: center; font-style: italic; color: #999; }
   </style>
 </head>
 <body>
   {% include "partials/sidebar.html" %}
 
-  <div class="container">
-    <!-- Info Anggota -->
-    <div class="card">
-      <div class="row">
-        <div class="field">
-          <label>Nomor Anggota :</label>
-          <div>{{ anggota.nomor_anggota }}</div>
+  <div class="main-content">
+    <!-- Detail Simpanan -->
+    <div class="content-card">
+      <h1>Detail Simpanan</h1>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">Nomor Anggota</div>
+          <div class="value">{{ simpanan.anggota.nomor_anggota }}</div>
         </div>
-        <div class="field">
-          <label>Nama Anggota :</label>
-          <div>{{ anggota.nama }}</div>
+        <div class="detail-item">
+          <div class="label">Nama Anggota</div>
+          <div class="value">{{ simpanan.anggota.nama }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">Jenis Simpanan</div>
+          <div class="value">{{ simpanan.jenis_simpanan }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="label">Tanggal Membuat Tabungan</div>
+            <div class="value">
+              {% if simpanan.anggota.tanggal_daftar %}
+                {{ simpanan.anggota.tanggal_daftar|date:"d M Y" }}
+              {% else %}
+                -
+              {% endif %}
+            </div>
+          </div>
+        <div class="detail-item">
+          <div class="label">Saldo {{ simpanan.jenis_simpanan }}</div>
+          <div class="value">Rp {{ saldo_jenis|floatformat:0 }}</div>
         </div>
       </div>
-
-      <div class="row">
-        <div class="field">
-          <label>Jumlah Pokok :</label>
-          <div>Rp. {{ total_pokok|default:"0" }}</div>
-        </div>
-        <div class="field">
-          <label>Jumlah Wajib :</label>
-          <div>Rp. {{ total_wajib|default:"0" }}</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label>Jumlah Sukarela :</label>
-          <div>Rp. {{ total_sukarela|default:"0" }}</div>
-        </div>
-      </div>
-    </div>
-    <!-- Riwayat Transaksi -->
-    <h3>Riwayat Transaksi</h3>
-
-    <!-- Search box -->
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Cari transaksi (jenis, jumlah, tanggal)...">
+      <a href="{% url 'simpanan_anggota' simpanan.anggota.nomor_anggota %}" class="back-btn">← Kembali</a>
     </div>
 
-    <div class="transaksi-container" id="transaksiList">
-      {% if simpanan %}
-        {% for s in simpanan %}
-        <div class="transaksi">
-          <div class="transaksi-header">
-            <div class="jenis">{{ s.jenis_simpanan.nama_jenis }}</div>
-            <div><strong>Rp. {{ s.jumlah_menyimpan }}</strong></div>
-          </div>
-          <div class="desc">Setoran rutin bulanan</div>
-          <div class="meta">
-            <span>📅 {{ s.tanggal_menyimpan|date:"d F Y" }}</span>
-            <span>⏰ {{ s.tanggal_menyimpan|time:"H:i" }}</span>
-          </div>
-        </div>
+    <!-- Riwayat Transaksi dengan search per tanggal -->
+    <div class="content-card">
+      <h2>Riwayat Transaksi {{ simpanan.jenis_simpanan }}</h2>
+
+      <div class="filter-box">
+        <input type="date" id="filterTanggal" placeholder="Cari tanggal">
+      </div>
+
+      <ul class="transaction-list" id="transactionList">
+        {% for h in history %}
+        <li class="transaction-item" data-tanggal="{{ h.tgl|date:'Y-m-d' }}">
+          <span>{{ h.tgl|date:"d M Y" }}</span>
+          <span>{{ h.jenis_trans }}</span>
+          <span>Rp {{ h.jumlah|floatformat:0 }}</span>
+        </li>
         {% endfor %}
-      {% else %}
-        <div class="empty">Belum ada data transaksi.</div>
-      {% endif %}
+
+        {% if history|length == 0 %}
+        <li class="empty-state">Belum ada transaksi.</li>
+        {% endif %}
+      </ul>
     </div>
   </div>
 
   <script>
-    // Fitur search riwayat transaksi
-    const searchInput = document.getElementById("searchInput");
-    const transaksiList = document.getElementById("transaksiList");
-    const transaksiItems = transaksiList.getElementsByClassName("transaksi");
+    const filterTanggal = document.getElementById("filterTanggal");
+    const transactionList = document.getElementById("transactionList");
+    const items = Array.from(transactionList.getElementsByClassName("transaction-item"));
 
-    searchInput.addEventListener("keyup", function() {
-      const filter = this.value.toLowerCase();
-      for (let i = 0; i < transaksiItems.length; i++) {
-        const itemText = transaksiItems[i].innerText.toLowerCase();
-        transaksiItems[i].style.display = itemText.includes(filter) ? "" : "none";
+    function filterTransactions() {
+      const tanggalVal = filterTanggal.value;
+      let visibleCount = 0;
+
+      items.forEach(item => {
+        const itemTanggal = item.dataset.tanggal;
+        const show = !tanggalVal || itemTanggal === tanggalVal;
+        item.style.display = show ? "flex" : "none";
+        if (show) visibleCount++;
+      });
+
+      // Tampilkan empty-state kalau tidak ada yang match
+      let empty = document.querySelector(".empty-state");
+      if (visibleCount === 0) {
+        if (!empty) {
+          const li = document.createElement("li");
+          li.className = "empty-state";
+          li.textContent = "Tidak ada transaksi yang sesuai filter.";
+          transactionList.appendChild(li);
+        }
+      } else {
+        if (empty) empty.remove();
       }
-    });
+    }
+
+    filterTanggal.addEventListener("change", filterTransactions);
   </script>
 </body>
 </html>

@@ -30,6 +30,7 @@ urlpatterns = [
     path('dashboard/', include('admin_koperasi.urls', namespace='admin_koperasi')),
     path('pinjaman/', include('pinjaman.urls')),
     path('simpanan/', include('simpanan.urls')),
+    path("laporan/", include("laporan.urls")),
     path('api/', include('api.urls')),
 ]
 

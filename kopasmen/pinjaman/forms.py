@@ -17,7 +17,6 @@ class PinjamanForm(forms.ModelForm):
             'angsuran_per_bulan',
             'jasa_persen',
             'jasa_rupiah',
-            'status',
         ]
         
         widgets = {
@@ -31,8 +30,6 @@ class PinjamanForm(forms.ModelForm):
             'angsuran_per_bulan': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan jumlah angsuran per bulan'}),
             'jasa_persen': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan persentase jasa'}),
             'jasa_rupiah': forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
-            'status': forms.Select(choices=[('Lunas', 'Lunas'), ('Belum Lunas', 'Belum Lunas')],
-                                   attrs={'class': 'form-control'}),
         }
 
     def clean_jasa_rupiah(self):
@@ -66,5 +63,7 @@ class PinjamanForm(forms.ModelForm):
         if jumlah_pinjaman and jasa_persen:
             jasa_rupiah = jumlah_pinjaman * (jasa_persen / Decimal(100))
             cleaned_data['jasa_rupiah'] = jasa_rupiah.quantize(Decimal('0.01'))
+
+        cleaned_data['status'] = 'Belum Lunas'
 
         return cleaned_data

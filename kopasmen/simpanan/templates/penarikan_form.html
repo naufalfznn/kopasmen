@@ -111,15 +111,33 @@
 </head>
 <body>
     {% include "partials/sidebar.html" %}
-    <h2>Form Penarikan Simpanan</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="main-content">
 
-        <button type="submit">Simpan</button>
-    </form>
 
-    <p><a href="{% url 'daftar_simpanan' %}">Lihat Daftar Penarikan</a></p>
+        <div class="content-card">
+            <h1>Penarikan Simpanan</h1>
+
+            <p><b>Anggota:</b> {{ anggota.nama }} ({{ anggota.nomor_anggota }})</p>
+            <p><b>Jenis Simpanan:</b> {{ jenis.nama_jenis }}</p>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-actions">
+                    <button type="submit">💸 Tarik</button>
+                    <a href="{% url 'simpanan_anggota' anggota.nomor_anggota %}" class="cancel-btn">❌ Batal</a>
+                </div>
+            </form>
+
+            {% if messages %}
+            <ul>
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>
