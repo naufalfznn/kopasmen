@@ -1,64 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bayar Pinjaman</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bayar Pinjaman</title>
+<style>
+  /* ===== Reset ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    display: flex;
+  }
+  a { text-decoration: none; color: inherit; }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
+    padding: 20px 0;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  }
+
+  /* ===== Main Content ===== */
+  .main-content {
+    margin-left: 280px;
+    padding: 30px;
+    flex: 1;
+  }
+
+  h1 {
+    color: #4A2C2A;
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  }
+
+  .row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
+
+  .col {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #4A2C2A;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background: #fffefc;
+  }
+
+  input[disabled] {
+    background: #fdfaf4;
+    color: #555;
+  }
+
+  button {
+    background: #FFD700;
+    color: #333;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-right: 10px;
+  }
+  button:hover { background: #e6c200; }
+
+  .btn-cancel {
+    background: #fffefc;
+    color: #4A2C2A;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .btn-cancel:hover { background: #FFD700; color: #333; }
+
+  /* Responsive */
+  @media(max-width:768px){
+    .row { flex-direction: column; }
+  }
+</style>
 </head>
 <body>
 
+  <div class="sidebar">
+    {% include "partials/sidebar.html" %}
+  </div>
+
+  <div class="main-content">
     <h1>Bayar Pinjaman</h1>
 
-    <form method="POST">
-        {% csrf_token %}
-        <div>
-            <label>Nama Anggota:</label>
-            <input type="text" value="{{ pinjaman.nomor_anggota }}" disabled>
+    <form method="POST" class="card">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col">
+          <label>Nama Anggota:</label>
+          <input type="text" value="{{ pinjaman.nomor_anggota }}" disabled>
         </div>
-
-        <div>
-            <label>Pinjaman:</label>
-            <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman }}" disabled>
+        <div class="col">
+          <label>Pinjaman:</label>
+          <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman|floatformat:'-2' }}" disabled>
         </div>
+      </div>
 
-        <div>
-            <label>Sisa Pinjaman:</label>
-            <input type="text" value="Rp. {{ sisa_pinjaman }}" disabled>
+      <div class="row">
+        <div class="col">
+          <label>Sisa Pinjaman:</label>
+          <input type="text" value="Rp. {{ sisa_pinjaman|floatformat:'-2' }}" disabled>
         </div>
-
-        <div>
-            <label>Tanggal:</label>
-            <input type="date" name="tanggal_bayar" required>
+        <div class="col">
+          <label>Tanggal:</label>
+          <input type="date" name="tanggal_bayar" required>
         </div>
+      </div>
 
-        <div>
-            <label>Jumlah Cicilan Pokok:</label>
-            <input type="number" value="{{ angsuran_pokok }}" step="0.01" disabled>
+      <div class="row">
+        <div class="col">
+          <label>Jumlah Cicilan Pokok:</label>
+          <input type="text" value="Rp. {{ angsuran_pokok|floatformat:'-2' }}" disabled>
         </div>
-
-        <div>
-            <label>Persentase Jasa:</label>
-            <input type="number" value="{{ pinjaman.jasa_persen }}" step="0.01" disabled>
+        <div class="col">
+          <label>Persentase Jasa:</label>
+          <input type="text" value="{{ pinjaman.jasa_persen|floatformat:'-2' }}%" disabled>
         </div>
+      </div>
 
-        <div>
-            <label>Jumlah Jasa (Rp):</label>
-            <input type="number" value="{{ jasa_rupiah }}" step="0.01" disabled>
+      <div class="row">
+        <div class="col">
+          <label>Jumlah Jasa (Rp):</label>
+          <input type="text" value="Rp. {{ jasa_rupiah|floatformat:'-2' }}" disabled>
         </div>
-
-        <div>
-            <label>Jumlah Dibayar (Cicilan + Jasa):</label>
-            <input type="number" name="jumlah_dibayar" value="{{ jumlah_cicilan_total }}" step="0.01">
+        <div class="col">
+          <label>Jumlah Dibayar (Cicilan + Jasa):</label>
+          <input type="number" name="jumlah_dibayar" value="{{ jumlah_cicilan_total|floatformat:'-2' }}" step="0.01">
         </div>
-        <div>
-            <label>Admin Bertugas:</label>
-            <input type="text" value="{{ admin_login.username }} ({{ admin_login.role }})" disabled>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Admin Bertugas:</label>
+          <input type="text" value="{{ admin_login.username }} ({{ admin_login.role }})" disabled>
         </div>
+      </div>
 
-
-        <button type="submit">Bayar</button>
-        <a href="{% url 'pinjaman_list' %}">Batal</a>
+      <button type="submit">Bayar</button>
+      <a href="{% url 'pinjaman_list' %}" class="btn-cancel">Batal</a>
     </form>
+  </div>
 
 </body>
 </html>

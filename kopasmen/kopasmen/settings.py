@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "corsheaders",
     'rest_framework',
+    'widget_tweaks',
     'admin_koperasi',
     'anggota',
     'pinjaman',
     'simpanan',
+    'laporan',
 ]
 
 MIDDLEWARE = [

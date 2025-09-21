@@ -1,0 +1,40 @@
+<h2>{{ judul }} ({{ tahun }})</h2> 
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th rowspan="2">No</th>
+            <th rowspan="2">Nama Anggota</th>
+            <th colspan="4">Simpanan</th>
+            <th colspan="4">Saldo Pinjaman</th>
+        </tr>
+        <tr>
+            <th>Pokok</th>
+            <th>Wajib</th>
+            <th>Sukarela</th>
+            <th>Total</th>
+            <th>Reguler</th>
+            <th>Khusus</th>
+            <th>Barang</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in laporan %}
+        <tr>
+            <td>{{ item.no }}</td>
+            <td>{{ item.nama }}</td>
+            <td>{{ item.simpanan.pokok|floatformat:0 }}</td>
+            <td>{{ item.simpanan.wajib|floatformat:0 }}</td>
+            <td>{{ item.simpanan.sukarela|floatformat:0 }}</td>
+            <td>{{ item.simpanan.total|floatformat:0 }}</td>
+            <td>{{ item.pinjaman.reguler|floatformat:0 }}</td>
+            <td>{{ item.pinjaman.khusus|floatformat:0 }}</td>
+            <td>{{ item.pinjaman.barang|floatformat:0 }}</td>
+            <td>{{ item.pinjaman.total|floatformat:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10">Tidak ada data</td></tr>
+        {% endfor %}
+    </tbody>
+</table>

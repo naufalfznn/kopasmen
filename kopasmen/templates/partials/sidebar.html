@@ -15,7 +15,7 @@
             <li><a href="{% url 'kelola_akun' %}" class="{% if request.resolver_match.url_name == 'kelola_akun' %}active{% endif %}">Manajemen Anggota</a></li>
             <li><a href="{% url 'daftar_simpanan' %}" class="{% if request.resolver_match.url_name == 'daftar_simpanan' %}active{% endif %}">Manajemen Simpanan</a></li>
             <li><a href="{% url 'pinjaman_list' %}" class="{% if request.resolver_match.url_name == 'pinjaman_list' %}active{% endif %}">Manajemen Pinjaman</a></li>
-            <li><a href="#" class="{% if request.resolver_match.url_name == 'laporan' %}active{% endif %}">Laporan</a></li>
+            <li><a href="{% url 'laporan' %}" class="{% if request.resolver_match.url_name == 'laporan' %}active{% endif %}">Laporan</a></li>
         {% elif role == "bendahara" %}
             <li><a href="{% url 'daftar_simpanan' %}" class="{% if request.resolver_match.url_name == 'daftar_simpanan' %}active{% endif %}">Simpanan</a></li>
             <li><a href="{% url 'pinjaman_list' %}" class="{% if request.resolver_match.url_name == 'pinjaman_list' %}active{% endif %}">Pinjaman</a></li>

@@ -4,7 +4,6 @@ from django.contrib import messages
 from .models import Admin
 from .forms import LoginForm
 
-# import model lain
 from anggota.models import Anggota
 from simpanan.models import Simpanan
 from pinjaman.models import Pinjaman
@@ -66,6 +65,7 @@ def dashboard_view(request):
             'jumlah_anggota': jumlah_anggota,
             'jumlah_simpanan': jumlah_simpanan,
             'jumlah_pinjaman': jumlah_pinjaman,
+            'total_pinjaman': jumlah_pinjaman,
         })
 
         tpl = 'dashboard_ketua.html'
