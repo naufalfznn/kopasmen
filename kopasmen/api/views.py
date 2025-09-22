@@ -4,13 +4,11 @@ from rest_framework import status
 from .serializers import (
     LoginSerializer, AnggotaSerializer, ResetPasswordSerializer,
     SimpananSerializer, PenarikanSerializer,
-    PinjamanSerializer, AngsuranSerializer
+    PinjamanSerializer, AngsuranSerializer, ProfilAnggotaSerializer
 )
 from anggota.models import Anggota
 from simpanan.models import Simpanan, Penarikan
 from pinjaman.models import Pinjaman, Angsuran
-from pinjaman.models import Pinjaman, Angsuran
-from .serializers import PinjamanSerializer, AngsuranSerializer
 
 
 # ==========================
@@ -22,14 +20,14 @@ class LoginView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        nip = serializer.validated_data['nip']
+        nomor_anggota = serializer.validated_data['nomor_anggota']
         password = serializer.validated_data['password']
 
         try:
-            anggota = Anggota.objects.get(nip=nip, status="aktif")
+            anggota = Anggota.objects.get(nomor_anggota=nomor_anggota, status="aktif")
         except Anggota.DoesNotExist:
             return Response(
-                {"error": "NIP tidak ditemukan atau akun nonaktif"},
+                {"error": "Nomor anggota tidak ditemukan atau akun nonaktif"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -41,16 +39,17 @@ class LoginView(APIView):
             )
         return Response({"error": "Password salah"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class CheckNIPView(APIView):
+class CheckNomorAnggotaView(APIView):
     def post(self, request):
-        nip = request.data.get("nip")
-        if not nip:
-            return Response({"error": "NIP wajib diisi"}, status=status.HTTP_400_BAD_REQUEST)
+        nomor_anggota = request.data.get("nomor_anggota")
+        if not nomor_anggota:
+            return Response(
+                {"error": "Nomor anggota wajib diisi"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        exists = Anggota.objects.filter(nip=nip).exists()
+        exists = Anggota.objects.filter(nomor_anggota=nomor_anggota).exists()
         return Response({"exists": exists}, status=status.HTTP_200_OK)
-
 
 class ResetPasswordView(APIView):
     def post(self, request):
@@ -58,14 +57,14 @@ class ResetPasswordView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        nip = serializer.validated_data["nip"]
+        nomor_anggota = serializer.validated_data["nomor_anggota"]
         new_password = serializer.validated_data["password"]
 
         try:
-            anggota = Anggota.objects.get(nip=nip, status="aktif")
+            anggota = Anggota.objects.get(nomor_anggota=nomor_anggota, status="aktif")
         except Anggota.DoesNotExist:
             return Response(
-                {"error": "NIP tidak ditemukan atau akun nonaktif"},
+                {"error": "Nomor anggota tidak ditemukan atau akun nonaktif"},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -73,7 +72,6 @@ class ResetPasswordView(APIView):
         anggota.save()
 
         return Response({"message": "Password berhasil direset"}, status=status.HTTP_200_OK)
-
 
 # ==========================
 # Simpanan & Penarikan
@@ -114,4 +112,17 @@ class AngsuranListView(APIView):
             id_pinjaman=id_pinjaman
         ).order_by('-tanggal_bayar')
         serializer = AngsuranSerializer(angsuran, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ProfilAnggotaView(APIView):
+    def get(self, request, nip):
+        try:
+            anggota = Anggota.objects.get(nip=nip)
+        except Anggota.DoesNotExist:
+            return Response(
+                {"detail": "Anggota tidak ditemukan"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ProfilAnggotaSerializer(anggota)
         return Response(serializer.data, status=status.HTTP_200_OK)

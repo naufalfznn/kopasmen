@@ -6,12 +6,12 @@ from pinjaman.models import Pinjaman, Angsuran, JenisPinjaman, KategoriJasa
 
 
 class LoginSerializer(serializers.Serializer):
-    nip = serializers.CharField()
+    nomor_anggota = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    nip = serializers.CharField()
+    nomor_anggota = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
 
@@ -20,7 +20,11 @@ class AnggotaSerializer(serializers.ModelSerializer):
         model = Anggota
         fields = ["nomor_anggota", "nama", "nip", "email", "status"]
 
-
+class ProfilAnggotaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Anggota
+        fields = ["nomor_anggota", "nama", "nip", "email", "alamat", "no_telp", "status"]
+        
 class JenisSimpananSerializer(serializers.ModelSerializer):
     class Meta:
         model = JenisSimpanan
@@ -67,44 +71,60 @@ class PenarikanSerializer(serializers.ModelSerializer):
             "nominal",
         ]
 
+
 class JenisPinjamanSerializer(serializers.ModelSerializer):
     class Meta:
         model = JenisPinjaman
         fields = ["id_jenis_pinjaman", "nama_jenis"]
+
 
 class KategoriJasaSerializer(serializers.ModelSerializer):
     class Meta:
         model = KategoriJasa
         fields = ["id_kategori_jasa", "kategori_jasa"]
 
+
 class PinjamanSerializer(serializers.ModelSerializer):
-    nomor_anggota = serializers.StringRelatedField()
-    id_admin = serializers.StringRelatedField()
+    anggota = serializers.StringRelatedField(source="nomor_anggota")
     jenis_pinjaman = JenisPinjamanSerializer(source="id_jenis_pinjaman")
-    kategori_jasa = KategoriJasaSerializer(source="id_kategori_jasa")
-    nominal = serializers.DecimalField(
-        source="jumlah_pinjaman", max_digits=18, decimal_places=2
-    )  # alias ke Flutter
-    cicilan = serializers.DecimalField(
-        source="angsuran_per_bulan", max_digits=18, decimal_places=2
-    )
-    jasa = serializers.DecimalField(
-        source="jasa_rupiah", max_digits=18, decimal_places=2, required=False
-    )
+    kategori_pinjaman = KategoriJasaSerializer(source="id_kategori_jasa")
+    cicilan_terbayar = serializers.SerializerMethodField()
+    sisa_pinjaman = serializers.SerializerMethodField()
 
     class Meta:
         model = Pinjaman
         fields = [
-            "id_pinjaman", "nomor_anggota", "id_admin",
-            "jenis_pinjaman", "kategori_jasa", "nominal",
-            "cicilan", "jasa", "tanggal_meminjam",
-            "jatuh_tempo", "sisa_pinjaman", "status"
+            "id_pinjaman",
+            "anggota",
+            "jumlah_pinjaman",
+            "angsuran_per_bulan",
+            "jasa_persen",
+            "jasa_rupiah",         
+            "status",
+            "tanggal_meminjam",
+            "jatuh_tempo",     
+            "jenis_pinjaman",
+            "kategori_pinjaman",
+            "cicilan_terbayar",
+            "sisa_pinjaman",
         ]
 
+    def get_cicilan_terbayar(self, obj):
+        return Angsuran.objects.filter(id_pinjaman=obj).count()
+
+    def get_sisa_pinjaman(self, obj):
+        angsuran_pokok = obj.angsuran_per_bulan or 0
+        jumlah_cicilan_terbayar = Angsuran.objects.filter(id_pinjaman=obj).count()
+        total_pokok_bayar = jumlah_cicilan_terbayar * angsuran_pokok
+        return obj.jumlah_pinjaman - total_pokok_bayar
+
+
 class AngsuranSerializer(serializers.ModelSerializer):
-    id_pinjaman = serializers.PrimaryKeyRelatedField(read_only=True)
-    id_admin = serializers.StringRelatedField()
+    admin = serializers.StringRelatedField()
+    nominal = serializers.DecimalField(
+        source="jumlah_bayar", max_digits=18, decimal_places=2
+    )
 
     class Meta:
         model = Angsuran
-        fields = ["id_pembayaran", "id_pinjaman", "id_admin", "jumlah_bayar", "tanggal_bayar"]
+        fields = ["id_pembayaran", "id_pinjaman", "admin", "tanggal_bayar", "nominal"]
