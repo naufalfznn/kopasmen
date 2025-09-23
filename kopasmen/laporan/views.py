@@ -1,18 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.utils.timezone import now
-from django.http import HttpResponse
 import calendar
 from datetime import datetime, time
-import io
-
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-
-import openpyxl
-from openpyxl.utils import get_column_letter
 
 from simpanan.models import Simpanan
 from pinjaman.models import Pinjaman, Angsuran
@@ -105,6 +95,7 @@ def laporan_gabungan(request):
                     elif jenis == "Barang":
                         total_barang += sisa
 
+
             total_pinjaman = total_reguler + total_khusus + total_barang
 
             laporan.append({
@@ -144,66 +135,3 @@ def laporan_gabungan(request):
     }
 
     return render(request, "laporan.html", context)
-
-
-# =============== EXPORT PDF =================
-def laporan_pdf(request):
-    anggota_list = Anggota.objects.all().order_by("nama")
-    laporan = []
-    for idx, anggota in enumerate(anggota_list, start=1):
-        laporan.append([idx, anggota.nama])
-
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
-    elements = []
-
-    elements.append(Paragraph("Laporan Koperasi", styles["Title"]))
-    elements.append(Spacer(1, 12))
-
-    data = [["No", "Nama Anggota"]] + laporan
-    table = Table(data)
-    table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.gold),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("GRID", (0, 0), (-1, -1), 1, colors.black),
-    ]))
-    elements.append(table)
-
-    doc.build(elements)
-    buffer.seek(0)
-
-    return HttpResponse(buffer, content_type="application/pdf")
-
-
-# =============== EXPORT EXCEL =================
-def laporan_excel(request):
-    anggota_list = Anggota.objects.all().order_by("nama")
-
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Laporan Koperasi"
-
-    headers = ["No", "Nama Anggota"]
-    ws.append(headers)
-
-    for idx, anggota in enumerate(anggota_list, start=1):
-        ws.append([idx, anggota.nama])
-
-    # Auto adjust column width
-    for col in ws.columns:
-        max_length = 0
-        col_letter = get_column_letter(col[0].column)
-        for cell in col:
-            try:
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-            except:
-                pass
-        ws.column_dimensions[col_letter].width = max_length + 2
-
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="laporan.xlsx"'
-    wb.save(response)
-    return response
