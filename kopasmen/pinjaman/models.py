@@ -55,7 +55,7 @@ class Pinjaman(models.Model):
         db_table = 'Pinjaman'
 
     def __str__(self):
-        return f"Pinjaman {self.id_pinjaman} - {self.nomor_anggota}"
+        return f"Pinjaman {self.id_pinjaman} - {self.nomor_anggota.nama}"
 
     def hitung_jasa(self):
         """

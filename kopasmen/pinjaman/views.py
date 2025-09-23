@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.http import JsonResponse
 from django.db.models import Sum, Q
 from django.core.paginator import Paginator
 from .models import Pinjaman, Angsuran, Anggota, Admin
@@ -298,27 +299,45 @@ def tambah_pinjaman(request):
 
     username = request.session.get('admin_username')
     role = request.session.get('admin_role')
+    admin_id = request.session.get('admin_id')  # ambil id admin dari session
 
     if request.method == "POST":
         form = PinjamanForm(request.POST)
         if form.is_valid():
             pinjaman = form.save(commit=False)
+            pinjaman.id_admin_id = admin_id
+
             jumlah_pinjaman = pinjaman.jumlah_pinjaman
             jasa_persen = form.cleaned_data.get('jasa_persen')
 
-            if pinjaman.id_kategori_jasa.kategori_jasa.lower() == "turunan":
-                jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100 if jasa_persen else 0)
-            else:
-                jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100 if jasa_persen else 0)
+            jasa_rupiah = jumlah_pinjaman * (jasa_persen / 100 if jasa_persen else 0)
 
             pinjaman.jasa_rupiah = round(jasa_rupiah, 2)
             pinjaman.status = "Belum Lunas"
             pinjaman.save()
             return redirect('pinjaman_list')
     else:
-        form = PinjamanForm()
+        form = PinjamanForm(initial={'id_admin': admin_id})  # isi default admin
 
-    return render(request, 'pinjaman_form.html', {'form': form, 'username': username, 'role': role})
+    return render(request, 'pinjaman_form.html', {
+        'form': form,
+        'username': username,
+        'role': role,
+        'admin_id': admin_id,  # dikirim ke template
+    })
+
+
+# API untuk search anggota
+def anggota_search(request):
+    term = request.GET.get('q', '')
+    anggota = Anggota.objects.filter(nama__icontains=term)[:10]
+    results = []
+    for a in anggota:
+        results.append({
+            "id": a.nomor_anggota,   # FIX: pakai primary key yg bener
+            "text": f"{a.nama} ({a.nip})"   # bisa tampil nama + nip
+        })
+    return JsonResponse({"results": results})
 
 # Bayar Pinjaman
 def bayar_pinjaman(request, id_pinjaman):

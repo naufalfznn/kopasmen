@@ -20,17 +20,27 @@ class PinjamanForm(forms.ModelForm):
         ]
         
         widgets = {
-            'nomor_anggota': forms.Select(attrs={'class': 'form-control'}),
+            'nomor_anggota': forms.Select(attrs={'class': 'form-control select2'}),
             'id_jenis_pinjaman': forms.Select(attrs={'class': 'form-control'}),
             'id_kategori_jasa': forms.Select(attrs={'class': 'form-control'}),
-            'id_admin': forms.Select(attrs={'class': 'form-control'}),
+            'id_admin': forms.HiddenInput(),  # <--- BIKIN HIDDEN
             'tanggal_meminjam': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'jatuh_tempo': forms.NumberInput(attrs={'class': 'form-control','min': 1,'max': 36,'placeholder': 'Masukkan jumlah bulan (1-36)'}),
+            'jatuh_tempo': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'max': 36,
+                'placeholder': 'Masukkan jumlah bulan (1-36)'
+            }),
             'jumlah_pinjaman': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan jumlah pinjaman'}),
             'angsuran_per_bulan': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan jumlah angsuran per bulan'}),
             'jasa_persen': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Masukkan persentase jasa'}),
             'jasa_rupiah': forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # supaya tidak error "This field is required."
+        self.fields['id_admin'].required = False
 
     def clean_jasa_rupiah(self):
         cleaned_data = super().clean()
@@ -65,5 +75,4 @@ class PinjamanForm(forms.ModelForm):
             cleaned_data['jasa_rupiah'] = jasa_rupiah.quantize(Decimal('0.01'))
 
         cleaned_data['status'] = 'Belum Lunas'
-
         return cleaned_data

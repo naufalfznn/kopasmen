@@ -1,12 +1,23 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.utils.timezone import now
+from django.http import HttpResponse
 import calendar
 from datetime import datetime, time
+import io
+
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 from simpanan.models import Simpanan
 from pinjaman.models import Pinjaman, Angsuran
 from anggota.models import Anggota
+from admin_koperasi.models import Admin
 
 
 def laporan_gabungan(request):
@@ -23,12 +34,14 @@ def laporan_gabungan(request):
     tahun_range = list(range(2020, now().year + 1))
     bulan_list = list(range(1, 13))
 
+    # batas akhir bulan dipilih
     last_day_bulan = calendar.monthrange(tahun_bulan, bulan)[1]
     tanggal_akhir_bulan = datetime.combine(
         datetime(tahun_bulan, bulan, last_day_bulan),
         time(23, 59, 59)
     )
 
+    # batas akhir tahun dipilih
     tanggal_akhir_tahun = datetime.combine(
         datetime(tahun_tahunan, 12, 31),
         time(23, 59, 59)
@@ -37,7 +50,7 @@ def laporan_gabungan(request):
     def generate_laporan(anggota_list, akhir=None):
         laporan = []
         for idx, anggota in enumerate(anggota_list, start=1):
-            # SIMPANAN
+            # ===================== SIMPANAN =====================
             filter_args = {"anggota": anggota}
             if akhir:
                 filter_args["tanggal_menyimpan__lte"] = akhir
@@ -53,36 +66,44 @@ def laporan_gabungan(request):
             ).aggregate(total=Sum("jumlah_menyimpan"))["total"] or 0
             total_simpanan = pokok + wajib + sukarela
 
-            # PINJAMAN
+            # ===================== PINJAMAN =====================
             filter_pinj = {"nomor_anggota": anggota}
             if akhir:
                 filter_pinj["tanggal_meminjam__lte"] = akhir
 
             total_reguler = total_khusus = total_barang = 0
 
-            for jenis in ["reguler", "khusus", "barang"]:
+            for jenis in ["Reguler", "Khusus", "Barang"]:
                 pinjaman_qs = Pinjaman.objects.filter(
                     **filter_pinj, id_jenis_pinjaman__nama_jenis=jenis
                 )
 
                 for pin in pinjaman_qs:
-                    bayar = Angsuran.objects.filter(
+                    # Hitung sisa pokok
+                    angsuran_pokok = pin.angsuran_per_bulan or 0
+                    jumlah_cicilan_terbayar = Angsuran.objects.filter(
                         id_pinjaman=pin, tanggal_bayar__lte=akhir
-                    ).aggregate(total=Sum("jumlah_bayar"))["total"] or 0
+                    ).count()
+                    sisa_pinjaman = pin.jumlah_pinjaman - (jumlah_cicilan_terbayar * angsuran_pokok)
 
-                    # sisa pinjaman (tanpa jasa)
-                    sisa = pin.jumlah_pinjaman - bayar
+                    if sisa_pinjaman < 0:
+                        sisa_pinjaman = 0
 
-                    # tambahkan jasa_rupiah terakhir kalau ada
-                    jasa = pin.jasa_rupiah or 0
-                    sisa_total = sisa + jasa
+                    # Hitung jasa terbaru
+                    if pin.id_kategori_jasa.kategori_jasa.lower() == "turunan":
+                        jasa_rupiah = sisa_pinjaman * (pin.jasa_persen / 100 if pin.jasa_persen else 0)
+                    else:
+                        jasa_rupiah = pin.jumlah_pinjaman * (pin.jasa_persen / 100 if pin.jasa_persen else 0)
 
-                    if jenis == "reguler":
-                        total_reguler += sisa_total
-                    elif jenis == "khusus":
-                        total_khusus += sisa_total
-                    elif jenis == "barang":
-                        total_barang += sisa_total
+                    # Total kewajiban saat ini = sisa pokok + jasa terbaru
+                    sisa = sisa_pinjaman + jasa_rupiah
+
+                    if jenis == "Reguler":
+                        total_reguler += sisa
+                    elif jenis == "Khusus":
+                        total_khusus += sisa
+                    elif jenis == "Barang":
+                        total_barang += sisa
 
             total_pinjaman = total_reguler + total_khusus + total_barang
 
@@ -123,3 +144,66 @@ def laporan_gabungan(request):
     }
 
     return render(request, "laporan.html", context)
+
+
+# =============== EXPORT PDF =================
+def laporan_pdf(request):
+    anggota_list = Anggota.objects.all().order_by("nama")
+    laporan = []
+    for idx, anggota in enumerate(anggota_list, start=1):
+        laporan.append([idx, anggota.nama])
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    elements = []
+
+    elements.append(Paragraph("Laporan Koperasi", styles["Title"]))
+    elements.append(Spacer(1, 12))
+
+    data = [["No", "Nama Anggota"]] + laporan
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.gold),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    elements.append(table)
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    return HttpResponse(buffer, content_type="application/pdf")
+
+
+# =============== EXPORT EXCEL =================
+def laporan_excel(request):
+    anggota_list = Anggota.objects.all().order_by("nama")
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Laporan Koperasi"
+
+    headers = ["No", "Nama Anggota"]
+    ws.append(headers)
+
+    for idx, anggota in enumerate(anggota_list, start=1):
+        ws.append([idx, anggota.nama])
+
+    # Auto adjust column width
+    for col in ws.columns:
+        max_length = 0
+        col_letter = get_column_letter(col[0].column)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        ws.column_dimensions[col_letter].width = max_length + 2
+
+    response = HttpResponse(content_type="application/ms-excel")
+    response["Content-Disposition"] = 'attachment; filename="laporan.xlsx"'
+    wb.save(response)
+    return response
