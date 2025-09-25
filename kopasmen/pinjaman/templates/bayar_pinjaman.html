@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bayar Pinjaman</title>
 <style>
-  /* ===== Reset ===== */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Segoe UI', sans-serif;
@@ -13,9 +12,6 @@
     color: #333;
     display: flex;
   }
-  a { text-decoration: none; color: inherit; }
-
-  /* ===== Sidebar ===== */
   .sidebar {
     width: 280px;
     background: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
@@ -24,21 +20,16 @@
     height: 100vh;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   }
-
-  /* ===== Main Content ===== */
   .main-content {
     margin-left: 280px;
     padding: 30px;
     flex: 1;
   }
-
   h1 {
     color: #4A2C2A;
     font-size: 28px;
     margin-bottom: 25px;
   }
-
-  /* ===== Card ===== */
   .card {
     background: #fff;
     border-radius: 12px;
@@ -46,26 +37,22 @@
     margin-bottom: 30px;
     box-shadow: 0 2px 20px rgba(0,0,0,0.08);
   }
-
   .row {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
     margin-bottom: 15px;
   }
-
   .col {
     flex: 1;
     min-width: 200px;
   }
-
   label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
     color: #4A2C2A;
   }
-
   input, select {
     width: 100%;
     padding: 10px 12px;
@@ -74,12 +61,10 @@
     font-size: 14px;
     background: #fffefc;
   }
-
   input[disabled] {
     background: #fdfaf4;
     color: #555;
   }
-
   button {
     background: #FFD700;
     color: #333;
@@ -92,7 +77,6 @@
     margin-right: 10px;
   }
   button:hover { background: #e6c200; }
-
   .btn-cancel {
     background: #fffefc;
     color: #4A2C2A;
@@ -103,8 +87,6 @@
     transition: 0.2s;
   }
   .btn-cancel:hover { background: #FFD700; color: #333; }
-
-  /* Responsive */
   @media(max-width:768px){
     .row { flex-direction: column; }
   }
@@ -128,14 +110,14 @@
         </div>
         <div class="col">
           <label>Pinjaman:</label>
-          <input type="text" value="Rp. {{ pinjaman.jumlah_pinjaman|floatformat:'-2' }}" disabled>
+          <input type="text" value="Rp {{ pinjaman.jumlah_pinjaman|floatformat:0 }}" disabled>
         </div>
       </div>
 
       <div class="row">
         <div class="col">
           <label>Sisa Pinjaman:</label>
-          <input type="text" value="Rp. {{ sisa_pinjaman|floatformat:'-2' }}" disabled>
+          <input type="text" value="Rp {{ sisa_pinjaman|floatformat:0 }}" disabled>
         </div>
         <div class="col">
           <label>Tanggal:</label>
@@ -146,22 +128,37 @@
       <div class="row">
         <div class="col">
           <label>Jumlah Cicilan Pokok:</label>
-          <input type="text" value="Rp. {{ angsuran_pokok|floatformat:'-2' }}" disabled>
+          <input type="hidden" id="angsuran_pokok" value="{{ angsuran_pokok }}">
+          <input type="text" value="Rp {{ angsuran_pokok|floatformat:0 }}" disabled>
         </div>
         <div class="col">
           <label>Persentase Jasa:</label>
-          <input type="text" value="{{ pinjaman.jasa_persen|floatformat:'-2' }}%" disabled>
+          <input type="text" name="jasa_persen" value="{{ pinjaman.jasa_persen|floatformat:2 }}%" readonly>
         </div>
       </div>
 
       <div class="row">
         <div class="col">
           <label>Jumlah Jasa (Rp):</label>
-          <input type="text" value="Rp. {{ jasa_rupiah|floatformat:'-2' }}" disabled>
+          <input type="hidden" id="jasa_rupiah" value="{{ jasa_rupiah }}">
+          <input type="text" value="Rp {{ jasa_rupiah|floatformat:0 }}" disabled>
         </div>
+        <div class="row">
+          <div class="col">
+            <label>Pilihan Pembayaran:</label>
+            <select id="tipe_bayar" name="tipe_bayar">
+              <option value="cicilan">Cicilan + Jasa</option>
+              <option value="jasa">Jasa Saja</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
         <div class="col">
-          <label>Jumlah Dibayar (Cicilan + Jasa):</label>
-          <input type="number" name="jumlah_dibayar" value="{{ jumlah_cicilan_total|floatformat:'-2' }}" step="0.01">
+          <label>Jumlah Dibayar:</label>
+          <input type="number" id="jumlah_dibayar" name="jumlah_dibayar" 
+                 value="{{ jumlah_cicilan_total|floatformat:0 }}">
         </div>
       </div>
 
@@ -176,6 +173,26 @@
       <a href="{% url 'pinjaman_list' %}" class="btn-cancel">Batal</a>
     </form>
   </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function(){
+    const tipeBayar = document.getElementById("tipe_bayar");
+    const jumlahInput = document.getElementById("jumlah_dibayar");
+    const angsuranPokok = parseInt(document.getElementById("angsuran_pokok").value || 0);
+    const jasaRupiah = parseInt(document.getElementById("jasa_rupiah").value || 0);
+
+    function updateJumlah() {
+      if(tipeBayar.value === "cicilan") {
+        jumlahInput.value = angsuranPokok + jasaRupiah;
+      } else {
+        jumlahInput.value = jasaRupiah;
+      }
+    }
+
+    tipeBayar.addEventListener("change", updateJumlah);
+    updateJumlah();
+  });
+</script>
 
 </body>
 </html>

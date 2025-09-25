@@ -139,13 +139,14 @@
       <div class="row">
         <div class="col">
           <label>Jumlah Jasa (Rp):</label>
-          <input type="text" readonly value="Rp. {{ pembayaran.id_pinjaman.jasa_rupiah|floatformat:'-2' }}">
+          <input type="text" readonly value="Rp. {{ jasa_rupiah|floatformat:'-2' }}">
         </div>
         <div class="col">
           <label>Jumlah Dibayar:</label>
-          <input type="text" readonly value="Rp. {{ pembayaran.jumlah_bayar|floatformat:'-2' }}">
+          <input type="text" readonly value="Rp. {{ jumlah_pembayaran|floatformat:'-2' }}">
         </div>
       </div>
+
 
       <div class="row">
         <div class="col">

@@ -230,8 +230,11 @@
                 </thead>
                 <tbody>
                     {% for nomor_anggota, data in anggota_data.items %}
-                        {% if data.status_reguler != "Lunas" or data.status_khusus != "Lunas" or data.status_barang != "Lunas" %}
-                            <!-- Tampilkan hanya pinjaman aktif -->
+                        {% if data.pinjaman_reguler_awal == 0 and data.pinjaman_khusus_awal == 0 and data.pinjaman_barang_awal == 0 %}
+                            <tr>
+                                <td colspan="10" class="empty-state">Belum ada pinjaman aktif</td>
+                            </tr>
+                        {% else %}
                             {% if data.pinjaman_reguler_awal and data.status_reguler != "Lunas" %}
                                 <tr>
                                     <td>{{ data.tanggal_meminjam|date:"d M Y" }}</td>

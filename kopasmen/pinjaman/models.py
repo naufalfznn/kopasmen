@@ -74,6 +74,11 @@ class Angsuran(models.Model):
     id_admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
     jumlah_bayar = models.DecimalField(max_digits=18, decimal_places=2)
     tanggal_bayar = models.DateField()
+    TIPE_BAYAR_CHOICES = (
+        ("cicilan", "Cicilan + Jasa"),
+        ("jasa", "Jasa Saja"),
+    )
+    tipe_bayar = models.CharField(max_length=10, choices=TIPE_BAYAR_CHOICES, default="cicilan")
 
     class Meta:
         db_table = 'Angsuran'
